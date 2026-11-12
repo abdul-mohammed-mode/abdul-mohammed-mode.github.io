@@ -377,6 +377,8 @@
   function rendreArticle() {
     const p = produits[etat.sel]; const m = p.modeles[etat.modele];
     const img = photoActuelle(p);
+    const choisie = m.couleurs.find((x) => x.nom === etat.couleur);
+    const sansPhoto = !!(choisie && !choisie.photo);
     const couleurChoisie = m.couleurs.length ? etat.couleur : etat.couleurTexte.trim();
     const sousTotal = p.offre3pour10 ? '' : ' · ' + p.prix * etat.qte + ' €';
     const puces = (liste, actif, attr, carre) => liste.map((v) => p.epuises.includes(v)
@@ -391,7 +393,7 @@
         '<button type="button" class="retour" data-retour aria-label="Retour au catalogue">' + ICONE_RETOUR + '</button>' +
         (p.code ? '<span class="badge-code">' + esc(p.code) + '</span>' : '') +
       '</div>' +
-      (img ? '<p class="mention-photo">' + esc(BOUTIQUE.mentionPhoto) + '</p>' : '') +
+      (img ? '<p class="mention-photo">' + (sansPhoto ? '<b>Pas encore de photo pour le coloris « ' + esc(etat.couleur) + ' ».</b> ' : '') + esc(BOUTIQUE.mentionPhoto) + '</p>' : '') +
       '<div class="fiche">' +
         '<div><h1>' + esc(p.nom) + '</h1><p class="prix-grand">' + p.prix + ' € ' + (p.offre3pour10 ? '<span class="offre">3 pour 10 € (à mélanger)</span>' : '') + '</p>' +
           (p.description ? '<p class="desc">' + esc(p.description) + '</p>' : '') +

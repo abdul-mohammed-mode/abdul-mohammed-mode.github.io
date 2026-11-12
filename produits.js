@@ -95,13 +95,14 @@ const PRODUITS = [
   // ---------------- ROBES & ABAYAS ----------------
   {
     categorie: 'Robes & abayas', code: 'RO-01', nom: 'Robe en velours brodée', prix: 10,
-    description: 'Robe longue en velours, broderie au col. Parfaite pour les occasions.',
+    description: 'Robe longue en velours doux, ornée d’une broderie au col. Élégante et chaude, parfaite pour les fêtes et les occasions. Le motif de la broderie varie selon le coloris.',
     tailles: M_A_XXXL,
     modeles: {
       'Broderie dorée': {
         'Noir': 'vel-noir.jpg', 'Bordeaux': 'vel-bordeaux.jpg', 'Fuchsia': 'vel-fuchsia.jpg',
         'Vert sapin': 'vel-vertsapin.jpg', 'Bleu roi': 'vel-bleuroi.jpg', 'Bleu marine': 'vel-marine.jpg',
-        'Moutarde': 'vel-moutarde.jpg', 'Vert sauge': 'vel-vertsauge.jpg', 'Prune': 'vel-prune.jpg'
+        'Moutarde': 'vel-moutarde.jpg', 'Vert d’eau': 'vel-vertsauge.jpg', 'Mauve': 'vel-prune.jpg',
+        'Turquoise': null, 'Bleu canard': null, 'Prune': null, 'Taupe': null, 'Kaki': null
       },
       'Strass au col V': {
         'Beige': 'str-beige.jpg', 'Vieux rose': 'str-vieuxrose.jpg',
@@ -205,8 +206,8 @@ const PRODUITS = [
   {
     categorie: 'Pantalons & jupes', code: 'PA-01', nom: 'Pantalon à boucle strass', prix: 5,
     description: 'Pantalon droit fluide et habillé, boucle en strass à la taille et poches.',
-    tailles: ['M/L', 'L/XL'],
-    couleurs: { 'Taupe': 'pb-taupe.jpg', 'Bleu': 'pb-bleu.jpg', 'Noir': 'pb-noir.jpg' }
+    tailles: ['M/L', 'L/XL', 'XL/XXL'],
+    couleurs: { 'Bleu marine': null, 'Kaki': null, 'Beige': 'pb-taupe.jpg', 'Noir': 'pb-noir.jpg' }
   },
   {
     categorie: 'Pantalons & jupes', code: 'JL-01', nom: 'Jupe longue côtelée', prix: 5,
@@ -249,20 +250,20 @@ const PRODUITS = [
     couleurs: { 'Blanc': 'ts-blanc.jpg', 'Noir': 'ts-noir.jpg', 'Gris': 'ts-gris.jpg', 'Taupe': 'ts-taupe.jpg' }
   },
   {
-    categorie: 'Basiques', code: 'LE-01', nom: 'Legging moulant', prix: 4, offre3pour10: true,
-    description: 'Léger et confortable, taille élastique.',
+    categorie: 'Basiques', code: 'LE-01', nom: 'Legging', prix: 4, offre3pour10: true,
+    description: 'Legging long ajusté en jersey fin et extensible, comme une seconde peau, taille élastique. Parfait sous une robe ou une abaya.',
     tailles: TU,
     couleurs: { 'Noir': 'le-noir.jpg', 'Blanc': 'le-blanc.jpg', 'Gris': 'le-gris.jpg', 'Beige': 'le-beige.jpg' }
   },
   {
-    categorie: 'Basiques', code: 'LE-02', nom: 'Legging mi-mollet', prix: 4, offre3pour10: true,
-    description: 'Léger et confortable, taille élastique, arrive au mollet.',
+    categorie: 'Basiques', code: 'LE-02', nom: 'Legging court', prix: 4, offre3pour10: true,
+    description: 'Legging court qui s’arrête au genou, en jersey fin et extensible, taille élastique. Léger et pratique sous une robe ou une abaya.',
     tailles: TU,
-    couleurs: { 'Noir': 'lm-noir.jpg', 'Blanc': 'lm-blanc.jpg', 'Gris': 'lm-gris.jpg', 'Beige': 'lm-beige.jpg' }
+    couleurs: { 'Noir': 'lc-noir.jpg', 'Blanc': 'lc-blanc.jpg', 'Gris': 'lc-gris.jpg', 'Beige': 'lc-beige.jpg' }
   },
   {
     categorie: 'Basiques', code: 'LE-03', nom: 'Legging pantacourt', prix: 4, offre3pour10: true,
-    description: 'Léger et confortable, taille élastique, longueur genou.',
+    description: 'Legging pantacourt qui s’arrête à mi-mollet, en jersey fin et extensible, taille élastique. Idéal en sous-couche.',
     tailles: TU,
     couleurs: { 'Noir': 'lp-noir.jpg', 'Blanc': 'lp-blanc.jpg', 'Gris': 'lp-gris.jpg', 'Beige': 'lp-beige.jpg' }
   },
