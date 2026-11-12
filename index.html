@@ -647,7 +647,12 @@
     // feux tricolores
     const feu = (cx, cy) => '<g><rect x="' + (cx - 5) + '" y="' + (cy - 12) + '" width="10" height="24" rx="3" fill="#2B2A28"/><circle cx="' + cx + '" cy="' + (cy - 6) + '" r="2.6" fill="#E5483B"/><circle cx="' + cx + '" cy="' + cy + '" r="2.6" fill="#F2B233"/><circle cx="' + cx + '" cy="' + (cy + 6) + '" r="2.6" fill="#3DBA6A"/></g>';
     const coins = { 'bas-gauche': [SIDE + RS / 2, Ht - 22], 'bas-droite': [W - SIDE - RS / 2, Ht - 22], 'haut-gauche': [SIDE + RS / 2, 26], 'haut-droite': [W - SIDE - RS / 2, 26] };
-    (cfg.feux || []).forEach((c) => { if (coins[c]) fond.push(feu(coins[c][0], coins[c][1])); });
+    (cfg.feux || []).forEach((c) => {
+      const [coin, x2] = c.split(' ');
+      if (!coins[coin]) return;
+      const [fx, fy] = coins[coin];
+      if (x2 === 'x2') { fond.push(feu(fx - 7, fy)); fond.push(feu(fx + 7, fy)); } else fond.push(feu(fx, fy));
+    });
     fond.push(txt(W - 8, 10, 'N ↑', 'text-anchor="end" font-size="10" font-weight="700" fill="#8A847C"'));
     $('schema').innerHTML = '<svg width="100%" style="max-width:' + Math.round(W * 1.15) + 'px" viewBox="0 0 ' + W + ' ' + Ht + '" role="img" aria-label="Plan du marché">' + fond.join('') + out.join('') + dessus.join('') + '</svg>';
     const first = casesStand[0];

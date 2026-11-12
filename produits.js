@@ -26,7 +26,7 @@ const BOUTIQUE = {
   adresse: 'Rue Denis Diderot, 78200 Mantes-la-Jolie',
   // Position du stand sur le plan [latitude, longitude]
   // (pour la changer : appui long sur Google Maps à l'endroit du stand, puis copier les 2 nombres)
-  positionStand: [48.99752, 1.68387],
+  positionStand: [48.99826, 1.68418],
   // Plan du marché vu du dessus : 2 parties, 3 allées chacune (celle du milieu = principale)
   // cases = nombre d'emplacements de 4 m² le long de chaque allée
   planMarche: {
@@ -43,20 +43,21 @@ const BOUTIQUE = {
     // detail : petite ligne en dessous (\n = retour à la ligne)
     // de / a : position verticale de 0 (tout en haut) à 1 (tout en bas)
     reperes: [
-      { nom: 'Mairie de quartier', detail: '', cote: 'droite', de: 0.03, a: 0.20, type: 'mairie' },
+      { nom: 'Mairie de quartier', detail: '(ancienne\nCAF)', cote: 'droite', de: 0.03, a: 0.20, type: 'mairie' },
       { nom: 'École maternelle', detail: 'Les Gentianes', cote: 'droite', de: 0.25, a: 0.45, type: 'ecole' },
       { nom: 'Aire de jeux', detail: '', cote: 'droite', de: 0.63, a: 0.76, type: 'jeux' },
       { nom: 'Terrains de basket', detail: '', cote: 'gauche', de: 0.50, a: 0.62, type: 'sport' },
       { nom: 'Gymnase Louis Lécuyer', detail: 'Toilettes\n0,50 € / pers.', cote: 'gauche', de: 0.66, a: 0.90, type: 'gymnase' }
     ],
     // Feux tricolores : coin 'bas-gauche', 'bas-droite', 'haut-gauche' ou 'haut-droite'
-    feux: ['bas-gauche', 'bas-droite']
+    // (ajouter ' x2' pour un double feu, ex. 'haut-gauche x2')
+    feux: ['haut-gauche x2', 'bas-gauche', 'bas-droite']
   },
   // Emplacement(s) du stand sur ce plan (cliquer sur le plan en mode modification
   // — adresse du site suivie de ?modifier — puis recopier le code affiché ici)
-  standCases: [],
+  standCases: ['1-1-5', '1-1-6', '1-1-7'],
   // Repère pour trouver le stand (laisser '' si rien à dire)
-  repereStand: '',
+  repereStand: 'Partie nord, 1re rangée côté rue Denis Diderot, 5e emplacement en venant de la rue La Fontaine (près du double feu).',
   // Créneaux proposés pour l'heure de passage
   creneaux: ['14h – 15h', '15h – 16h', '16h – 17h'],
   // Nombre de jours de marché proposés
