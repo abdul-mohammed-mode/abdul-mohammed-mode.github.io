@@ -207,7 +207,7 @@ const PRODUITS = [
     categorie: 'Pantalons & jupes', code: 'PA-01', nom: 'Pantalon à boucle strass', prix: 5,
     description: 'Pantalon droit fluide et habillé, boucle en strass à la taille et poches.',
     tailles: ['M/L', 'L/XL', 'XL/XXL'],
-    couleurs: { 'Bleu marine': null, 'Kaki': null, 'Beige': 'pb-taupe.jpg', 'Noir': 'pb-noir.jpg' }
+    couleurs: { 'Bleu marine': 'pb-marine.jpg', 'Kaki': 'pb-kaki.jpg', 'Beige': 'pb-beige.jpg', 'Noir': 'pb-noir.jpg' }
   },
   {
     categorie: 'Pantalons & jupes', code: 'JL-01', nom: 'Jupe longue côtelée', prix: 5,
@@ -257,15 +257,15 @@ const PRODUITS = [
   },
   {
     categorie: 'Basiques', code: 'LE-02', nom: 'Legging court', prix: 4, offre3pour10: true,
-    description: 'Legging court qui s’arrête au genou, en jersey fin et extensible, taille élastique. Léger et pratique sous une robe ou une abaya.',
+    description: 'Legging court qui s’arrête à mi-mollet, en jersey fin et extensible, taille élastique. Léger et pratique sous une robe ou une abaya.',
     tailles: TU,
-    couleurs: { 'Noir': 'lc-noir.jpg', 'Blanc': 'lc-blanc.jpg', 'Gris': 'lc-gris.jpg', 'Beige': 'lc-beige.jpg' }
+    couleurs: { 'Noir': 'lp-noir.jpg', 'Blanc': 'lp-blanc.jpg', 'Gris': 'lp-gris.jpg', 'Beige': 'lp-beige.jpg' }
   },
   {
     categorie: 'Basiques', code: 'LE-03', nom: 'Legging pantacourt', prix: 4, offre3pour10: true,
-    description: 'Legging pantacourt qui s’arrête à mi-mollet, en jersey fin et extensible, taille élastique. Idéal en sous-couche.',
+    description: 'Legging pantacourt qui s’arrête juste sous le genou, en jersey fin et extensible, taille élastique. Idéal en sous-couche.',
     tailles: TU,
-    couleurs: { 'Noir': 'lp-noir.jpg', 'Blanc': 'lp-blanc.jpg', 'Gris': 'lp-gris.jpg', 'Beige': 'lp-beige.jpg' }
+    couleurs: { 'Noir': 'lc-noir.jpg', 'Blanc': 'lc-blanc.jpg', 'Gris': 'lc-gris.jpg', 'Beige': 'lc-beige.jpg' }
   },
   {
     categorie: 'Basiques', code: 'JU-01', nom: 'Jupon dentelle', prix: 4, offre3pour10: true,
