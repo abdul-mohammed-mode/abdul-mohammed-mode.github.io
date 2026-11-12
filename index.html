@@ -159,6 +159,20 @@
   .plan .haut h1 { margin: 0; font-size: 20px; flex: 1; }
   .plan .haut .retour { position: static; box-shadow: none; border: 1px solid var(--bord); }
   #carte { flex: 1; min-height: 0; background: var(--photo); }
+  .onglets { display: flex; gap: 6px; padding: 10px 16px; border-bottom: 1px solid #E6E1D9; }
+  .onglet { flex: 1; height: 38px; border-radius: 10px; border: 1px solid var(--bord); background: #FFFFFF; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .onglet.on { background: var(--vert); border-color: var(--vert); color: #FFFFFF; }
+  #schema { flex: 1; min-height: 0; overflow: auto; background: #F7F5F1; display: flex; justify-content: center; padding: 12px 0 24px; }
+  #schema svg { display: block; }
+  #schema .case { cursor: default; }
+  .edition #schema .case { cursor: pointer; }
+  .edition #schema .case:hover { stroke: #C8102E; stroke-width: 2; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+  #schema .stand { animation: pulse 1.6s ease-in-out infinite; }
+  .barre-edition { display: none; padding: 10px 16px; gap: 8px; align-items: center; background: #FFF4E5; border-bottom: 1px solid #F0D9B5; font-size: 13px; }
+  .edition .barre-edition { display: flex; flex-wrap: wrap; }
+  .barre-edition code { flex: 1; min-width: 0; font-size: 12px; background: #FFFFFF; border: 1px solid #F0D9B5; border-radius: 8px; padding: 6px 8px; overflow-wrap: anywhere; }
+  .barre-edition button { height: 34px; padding: 0 12px; border-radius: 8px; border: 0; background: var(--vert); color: #FFFFFF; font-weight: 700; cursor: pointer; }
   .plan .infos-plan { padding: 14px 20px calc(18px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #E6E1D9; }
   .plan .infos-plan p { margin: 0; font-size: 14px; color: var(--gris); line-height: 1.4; }
   .plan .infos-plan b { color: var(--texte); }
@@ -218,7 +232,17 @@
     <button type="button" class="retour" id="plan-fermer" aria-label="Fermer le plan"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1B1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
     <h1>Où trouver le stand</h1>
   </div>
-  <div id="carte"></div>
+  <div class="onglets">
+    <button type="button" class="onglet on" data-onglet="schema">Plan du marché</button>
+    <button type="button" class="onglet" data-onglet="carte">Carte du quartier</button>
+  </div>
+  <div class="barre-edition">
+    <span><b>Mode modification</b> : touchez les cases de votre stand. Code à recopier dans produits.js :</span>
+    <code id="code-stand">standCases: []</code>
+    <button type="button" id="copier-stand">Copier</button>
+  </div>
+  <div id="schema"></div>
+  <div id="carte" style="display:none"></div>
   <div class="infos-plan">
     <p><b id="plan-lieu"></b><br><span id="plan-adresse"></span><br><span id="plan-jours"></span></p>
     <p id="plan-repere"></p>
@@ -524,6 +548,98 @@
     $('plan-repere').style.display = BOUTIQUE.repereStand ? '' : 'none';
     $('plan-itineraire').href = lienMaps();
     $('plan').classList.add('actif'); history.pushState({ e: 'plan' }, '');
+    dessinerSchema(); montrerOnglet(ongletPlan);
+  }
+  let ongletPlan = 'schema';
+  function montrerOnglet(o) {
+    ongletPlan = o;
+    document.querySelectorAll('.onglet').forEach((b) => b.classList.toggle('on', b.dataset.onglet === o));
+    $('schema').style.display = o === 'schema' ? 'flex' : 'none';
+    $('carte').style.display = o === 'carte' ? 'block' : 'none';
+    if (o === 'carte') initCarte();
+    else { const st = $('schema').querySelector('.stand'); if (st) setTimeout(() => st.scrollIntoView({ block: 'center', inline: 'center' }), 30); }
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-onglet]'); if (b) montrerOnglet(b.dataset.onglet); });
+
+  // --- plan schématique ---
+  const EDITION = /[?&]modifier/.test(location.search);
+  if (EDITION) document.body.classList.add('edition');
+  let casesStand = (BOUTIQUE.standCases || []).slice();
+  try { if (EDITION) { const s2 = JSON.parse(localStorage.getItem('stand-edition') || 'null'); if (Array.isArray(s2)) casesStand = s2; } } catch (e) {}
+  function dessinerSchema() {
+    const cfg = BOUTIQUE.planMarche || { parties: [{ nom: 'Partie 1', cases: 14 }, { nom: 'Partie 2', cases: 14 }] };
+    const C = 26, AL = 26, AP = 40, RUE = 46, M = 54, ENT = 34;
+    // colonnes : case | allée | case case | allée principale | case case | allée | case
+    const cols = [['c', 1], ['a', 1], ['c', 2], ['c', 3], ['p', 2], ['c', 4], ['c', 5], ['a', 3], ['c', 6]];
+    const largeur = cols.reduce((w, [t]) => w + (t === 'c' ? C : t === 'p' ? AP : AL), 0);
+    const W = largeur + 2 * M;
+    let y = ENT, out = [];
+    const txt = (x, yy, t, opts) => '<text x="' + x + '" y="' + yy + '" ' + (opts || '') + ' font-family="DM Sans, sans-serif">' + esc(t) + '</text>';
+    out.push(txt(W / 2, 20, 'Nord ↑', 'text-anchor="middle" font-size="12" fill="#8A847C" font-weight="700"'));
+    cfg.parties.forEach((part, pi) => {
+      const H = part.cases * C;
+      out.push('<rect x="' + (M - 6) + '" y="' + (y - 6) + '" width="' + (largeur + 12) + '" height="' + (H + 12) + '" rx="10" fill="#FFFFFF" stroke="#D9D4CC"/>');
+      let x = M;
+      cols.forEach(([t, n]) => {
+        const w = t === 'c' ? C : t === 'p' ? AP : AL;
+        if (t === 'c') {
+          for (let r = 0; r < part.cases; r++) {
+            const id = (pi + 1) + '-' + n + '-' + (r + 1);
+            const on = casesStand.includes(id);
+            out.push('<rect class="case' + (on ? ' stand' : '') + '" data-case="' + id + '" x="' + (x + 1) + '" y="' + (y + r * C + 1) + '" width="' + (C - 2) + '" height="' + (C - 2) + '" rx="3" fill="' + (on ? '#D32F2F' : '#E9E4DC') + '" stroke="' + (on ? '#8E1B1B' : '#D6CFC4') + '"/>');
+          }
+        } else {
+          out.push('<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + H + '" fill="' + (t === 'p' ? '#FBEFD9' : '#FAF8F4') + '"/>');
+          out.push(txt(x + w / 2, y + H / 2, t === 'p' ? 'Allée principale' : 'Allée', 'text-anchor="middle" font-size="' + (t === 'p' ? 12 : 10) + '" font-weight="' + (t === 'p' ? 700 : 500) + '" fill="' + (t === 'p' ? '#9A6A1C' : '#A8A29A') + '" transform="rotate(-90 ' + (x + w / 2) + ' ' + (y + H / 2) + ')" dominant-baseline="middle"'));
+        }
+        x += w;
+      });
+      out.push(txt(W / 2, y - 12, part.nom, 'text-anchor="middle" font-size="13" font-weight="700" fill="#1C1B1A"'));
+      y += H;
+      if (pi < cfg.parties.length - 1) {
+        out.push('<rect x="0" y="' + (y + 10) + '" width="' + W + '" height="' + (RUE - 20) + '" fill="#CFC9C0"/>');
+        out.push(txt(W / 2, y + RUE / 2 + 4, cfg.entreLesParties || '', 'text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF"'));
+        y += RUE + 14;
+      }
+    });
+    const Ht = y + 16;
+    // rues sur les côtés
+    out.unshift('<rect x="0" y="' + ENT + '" width="' + (M - 18) + '" height="' + (Ht - ENT - 10) + '" fill="#CFC9C0"/>' + '<rect x="' + (W - M + 18) + '" y="' + ENT + '" width="' + (M - 18) + '" height="' + (Ht - ENT - 10) + '" fill="#CFC9C0"/>');
+    out.push(txt((M - 18) / 2, Ht / 2, cfg.coteGauche || '', 'text-anchor="middle" font-size="11" font-weight="700" fill="#FFFFFF" transform="rotate(-90 ' + (M - 18) / 2 + ' ' + Ht / 2 + ')"'));
+    out.push(txt(W - (M - 18) / 2, Ht / 2, cfg.coteDroit || '', 'text-anchor="middle" font-size="11" font-weight="700" fill="#FFFFFF" transform="rotate(90 ' + (W - (M - 18) / 2) + ' ' + Ht / 2 + ')"'));
+    // étiquette "Mon stand"
+    const first = casesStand[0];
+    $('schema').innerHTML = '<svg width="' + W + '" height="' + Ht + '" viewBox="0 0 ' + W + ' ' + Ht + '" role="img" aria-label="Plan du marché">' + out.join('') + '</svg>';
+    if (first) {
+      const r = $('schema').querySelector('[data-case="' + first + '"]');
+      if (r) {
+        const bx = +r.getAttribute('x') + C / 2, by = +r.getAttribute('y');
+        const lab = BOUTIQUE.nom;
+        const tw = lab.length * 7 + 18;
+        const lx = Math.max(4, Math.min(W - tw - 4, bx - tw / 2));
+        $('schema').querySelector('svg').insertAdjacentHTML('beforeend',
+          '<g pointer-events="none"><rect x="' + lx + '" y="' + (by - 30) + '" width="' + tw + '" height="22" rx="6" fill="#D32F2F"/>' +
+          '<path d="M' + (bx - 6) + ' ' + (by - 8) + ' L' + bx + ' ' + (by - 1) + ' L' + (bx + 6) + ' ' + (by - 8) + ' Z" fill="#D32F2F"/>' +
+          txt(lx + tw / 2, by - 15, lab, 'text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF"') + '</g>');
+      }
+    }
+    $('code-stand').textContent = "standCases: [" + casesStand.map((c) => "'" + c + "'").join(', ') + '],';
+  }
+  $('schema').addEventListener('click', (e) => {
+    if (!EDITION) return;
+    const r = e.target.closest('[data-case]'); if (!r) return;
+    const id = r.dataset.case;
+    casesStand = casesStand.includes(id) ? casesStand.filter((c) => c !== id) : casesStand.concat([id]);
+    try { localStorage.setItem('stand-edition', JSON.stringify(casesStand)); } catch (er) {}
+    const sc = [$('schema').scrollLeft, $('schema').scrollTop];
+    dessinerSchema(); $('schema').scrollLeft = sc[0]; $('schema').scrollTop = sc[1];
+  });
+  $('copier-stand').addEventListener('click', () => {
+    const t = $('code-stand').textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { $('copier-stand').textContent = 'Copié ✓'; }, () => { prompt('Copiez ce code :', t); });
+  });
+
+  function initCarte() {
     const pos = BOUTIQUE.positionStand || [48.99752, 1.68387];
     chargerLeaflet().then(() => {
       if (!carte) {

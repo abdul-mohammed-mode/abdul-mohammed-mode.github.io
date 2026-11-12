@@ -27,6 +27,20 @@ const BOUTIQUE = {
   // Position du stand sur le plan [latitude, longitude]
   // (pour la changer : appui long sur Google Maps à l'endroit du stand, puis copier les 2 nombres)
   positionStand: [48.99752, 1.68387],
+  // Plan du marché vu du dessus : 2 parties, 3 allées chacune (celle du milieu = principale)
+  // cases = nombre d'emplacements de 4 m² le long de chaque allée
+  planMarche: {
+    parties: [
+      { nom: 'Partie nord', cases: 16 },
+      { nom: 'Partie sud', cases: 12 }
+    ],
+    entreLesParties: 'Rue Boileau',
+    coteGauche: 'Rue Denis Diderot',
+    coteDroit: 'Rue Jean Racine'
+  },
+  // Emplacement(s) du stand sur ce plan (cliquer sur le plan en mode modification
+  // — adresse du site suivie de ?modifier — puis recopier le code affiché ici)
+  standCases: [],
   // Repère pour trouver le stand (laisser '' si rien à dire)
   repereStand: '',
   // Créneaux proposés pour l'heure de passage
