@@ -21,6 +21,15 @@ const BOUTIQUE = {
   lieu: 'Marché de Mantes-la-Jolie',
   joursDeMarche: ['mardi', 'vendredi', 'dimanche'],
   horaires: '14h–17h',
+  heureDebut: 14, heureFin: 17,
+  // Adresse utilisée pour le bouton « Itinéraire »
+  adresse: 'Marché du Val Fourré, rue Boileau, 78200 Mantes-la-Jolie',
+  // Repère pour trouver le stand (laisser '' si rien à dire)
+  repereStand: '',
+  // Créneaux proposés pour l'heure de passage
+  creneaux: ['14h – 15h', '15h – 16h', '16h – 17h'],
+  // Nombre de jours de marché proposés
+  nbJoursProposes: 6,
   // Règle affichée sur chaque fiche et à la confirmation
   regleReservation: 'Article gardé jusqu’à 17h le jour choisi. S’il n’est pas récupéré, il est remis en vente.',
   // Avertissement sous les photos

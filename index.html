@@ -111,8 +111,20 @@
   .ligne .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .ligne .txt b { font-size: 14px; }
   .ligne .txt span { font-size: 13px; color: var(--gris); }
-  .jours { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-  .jour { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px; border-radius: 12px; cursor: pointer; background: #FFFFFF; border: 1px solid var(--bord); font-size: 14px; }
+  .jours { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; margin: 0 -2px; scrollbar-width: none; scroll-snap-type: x mandatory; }
+  .jours::-webkit-scrollbar { display: none; }
+  .jours .jour { flex: 0 0 92px; scroll-snap-align: start; }
+  .jour .num { font-size: 26px; font-weight: 700; line-height: 1.1; }
+  .jour .etiq { font-size: 11px; font-weight: 700; color: var(--vert); text-transform: uppercase; letter-spacing: 0.04em; min-height: 14px; }
+  .jour.on .etiq { color: var(--vert); }
+  .lieu { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--bord); }
+  .lieu svg { flex-shrink: 0; }
+  .lieu .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+  .lieu .txt span { color: var(--gris); font-size: 13px; }
+  .lieu a { flex-shrink: 0; font-size: 14px; font-weight: 700; color: var(--vert); }
+  .actions { display: flex; gap: 10px; }
+  .actions .btn { flex: 1; font-size: 15px; height: 48px; }
+  .jour { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 10px 6px; border-radius: 12px; cursor: pointer; background: #FFFFFF; border: 1px solid var(--bord); font-size: 14px; }
   .jour.on { border: 2px solid var(--vert); }
   .jour small { font-size: 12px; color: var(--gris); }
   .total { padding: 12px 14px; border-radius: 12px; background: var(--sable); display: flex; flex-direction: column; gap: 4px; }
@@ -219,7 +231,7 @@
   const categories = ['Tout'].concat([...new Set(produits.map((p) => p.categorie))]);
 
   // ---------- état ----------
-  const etat = { cat: 'Tout', q: '', sel: null, modele: 0, couleur: '', couleurTexte: '', taille: '', choix: {}, qte: 1, erreur: '', panier: [], jour: 0, nom: '', tel: '', code: '' };
+  const etat = { cat: 'Tout', q: '', sel: null, modele: 0, couleur: '', couleurTexte: '', taille: '', choix: {}, qte: 1, erreur: '', panier: [], jour: 0, creneau: '', nom: '', tel: '', code: '' };
   try { const s = JSON.parse(localStorage.getItem('panier-abdul') || 'null'); if (Array.isArray(s)) etat.panier = s; } catch (e) {}
   const sauver = () => { try { localStorage.setItem('panier-abdul', JSON.stringify(etat.panier)); } catch (e) {} };
 
@@ -234,14 +246,35 @@
     const mois = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
     const voulus = BOUTIQUE.joursDeMarche.map((j) => noms.indexOf(norm(j)));
     const now = new Date(); const out = [];
-    for (let k = 0; out.length < 3 && k < 21; k++) {
+    const max = BOUTIQUE.nbJoursProposes || 6;
+    for (let k = 0; out.length < max && k < 35; k++) {
       const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + k);
       if (!voulus.includes(d.getDay())) continue;
-      if (k === 0 && now.getHours() >= 16) continue;
+      if (k === 0 && now.getHours() >= (BOUTIQUE.heureFin || 17) - 1) continue;
       const nom = noms[d.getDay()][0].toUpperCase() + noms[d.getDay()].slice(1);
-      out.push({ jour: k === 0 ? "Aujourd'hui" : nom, date: d.getDate() + ' ' + mois[d.getMonth()], complet: nom + ' ' + d.getDate() + ' ' + mois[d.getMonth()] });
+      const semaine = Math.floor((d - new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7))) / 6048e5);
+      const dejaSemPro = out.some((o) => o.semPro);
+      out.push({ semPro: semaine === 1, jour: nom.slice(0, 3) + '.', num: d.getDate(), mois: mois[d.getMonth()], etiq: k === 0 ? "Aujourd'hui" : k === 1 ? 'Demain' : semaine === 1 && !dejaSemPro ? 'Sem. pro.' : semaine >= 2 && !out.some((o) => o.sem2) ? 'Dans 2 sem.' : '', sem2: semaine >= 2,
+        complet: (k === 0 ? "Aujourd'hui, " : k === 1 ? 'Demain, ' : '') + nom.toLowerCase() + ' ' + d.getDate() + ' ' + mois[d.getMonth()], d: d });
     }
     return out;
+  }
+
+  const lienMaps = () => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(BOUTIQUE.adresse || BOUTIQUE.lieu);
+  function lienAgenda(jour) {
+    if (!jour) return '';
+    const h = (etat.creneau || '').match(/(\d+)h.*?(\d+)h/);
+    const deb = h ? +h[1] : (BOUTIQUE.heureDebut || 14), fin = h ? +h[2] : (BOUTIQUE.heureFin || 17);
+    const p2 = (n) => String(n).padStart(2, '0');
+    const dt = (hh) => jour.d.getFullYear() + p2(jour.d.getMonth() + 1) + p2(jour.d.getDate()) + 'T' + p2(hh) + '0000';
+    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//' + BOUTIQUE.nom + '//FR', 'BEGIN:VEVENT',
+      'UID:' + etat.code + '@abdul-mohammed-mode.github.io', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z',
+      'DTSTART:' + dt(deb), 'DTEND:' + dt(fin),
+      'SUMMARY:Retrait ' + BOUTIQUE.nom + ' (code ' + etat.code + ')',
+      'LOCATION:' + (BOUTIQUE.adresse || BOUTIQUE.lieu).replace(/,/g, '\\,'),
+      'DESCRIPTION:' + etat.panier.map((l) => l.qte + ' x ' + l.nom).join(' / ') + ' — ' + totaux().total + ' € à payer au stand',
+      'BEGIN:VALARM', 'TRIGGER:-PT2H', 'ACTION:DISPLAY', 'DESCRIPTION:Retrait au marché', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
   }
 
   // ---------- totaux (offre 3 pour 10 €) ----------
@@ -367,9 +400,15 @@
       '<div class="titre-ecran"><button type="button" class="retour" data-retour aria-label="Retour au catalogue">' + ICONE_RETOUR + '</button><h1>Ma réservation</h1></div>' +
       (t.nb === 0 ? '<div class="contenu" style="align-items:center;text-align:center;padding-top:48px"><p style="color:var(--gris)">Aucun article pour l’instant.</p><button type="button" class="btn petit clair" data-retour>Voir le catalogue</button></div>' :
       '<div class="contenu">' + '<div class="bloc">' + lignes + '</div>' +
-        '<div class="bloc"><h2>Je récupère au marché le…</h2><div class="jours">' +
-          jours.map((j, i) => '<button type="button" class="jour' + (i === etat.jour ? ' on' : '') + '" data-jour="' + i + '"><b>' + esc(j.jour) + '</b><small>' + esc(j.date) + '</small></button>').join('') +
-        '</div><p class="compte">' + esc(BOUTIQUE.lieu) + ' · retrait ' + esc(BOUTIQUE.horaires) + '</p></div>' +
+        '<div class="bloc"><h2>Je passe au stand le… <span>' + esc((jours[etat.jour] || {}).complet || '') + '</span></h2><div class="jours">' +
+          jours.map((j, i) => '<button type="button" class="jour' + (i === etat.jour ? ' on' : '') + '" data-jour="' + i + '"><span class="etiq">' + esc(j.etiq) + '</span><small>' + esc(j.jour) + '</small><span class="num">' + j.num + '</span><small>' + esc(j.mois) + '</small></button>').join('') +
+        '</div></div>' +
+        '<div class="bloc"><h2>Vers quelle heure ? <span>(facultatif)</span></h2><div class="options">' +
+          (BOUTIQUE.creneaux || []).map((c) => '<button type="button" class="choix carre' + (etat.creneau === c ? ' on' : '') + '" data-creneau="' + esc(c) + '">' + esc(c) + '</button>').join('') +
+        '</div><p class="compte">Ça nous aide à préparer votre sac à temps.</p></div>' +
+        '<div class="lieu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F5C55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>' +
+          '<div class="txt"><b>' + esc(BOUTIQUE.lieu) + '</b><span>' + esc(BOUTIQUE.repereStand || ('Retrait ' + BOUTIQUE.horaires)) + '</span></div>' +
+          '<a href="' + esc(lienMaps()) + '" target="_blank" rel="noopener">Itinéraire</a></div>' +
         '<div class="bloc"><h2>À quel nom ?</h2>' +
           '<input class="champ" id="nom" autocomplete="name" placeholder="Prénom et nom" value="' + esc(etat.nom) + '">' +
           '<input class="champ" id="tel" type="tel" autocomplete="tel" placeholder="Téléphone (WhatsApp)" value="' + esc(etat.tel) + '"></div>' +
@@ -393,17 +432,20 @@
     const t = totaux(); const jour = joursMarche()[etat.jour] || {};
     const msg = ['Bonjour ' + BOUTIQUE.nom + ', je réserve :']
       .concat(etat.panier.map((l) => '- ' + l.qte + ' × ' + l.nom + (l.code ? ' (' + l.code + ')' : '') + [l.modele, l.couleur, l.taille].filter(Boolean).map((x) => ' · ' + x).join('') + ' · ' + l.prix + ' €'))
-      .concat(['Total à payer au stand : ' + t.total + ' €', 'Retrait : ' + (jour.complet || '') + ', ' + BOUTIQUE.horaires + ', ' + BOUTIQUE.lieu, 'Nom : ' + etat.nom.trim(), 'Tél. : ' + etat.tel.trim(), 'Code : ' + etat.code]).join('\n');
+      .concat(['Total à payer au stand : ' + t.total + ' €', 'Retrait : ' + (jour.complet || '') + ', ' + (etat.creneau || BOUTIQUE.horaires) + ', ' + BOUTIQUE.lieu, 'Nom : ' + etat.nom.trim(), 'Tél. : ' + etat.tel.trim(), 'Code : ' + etat.code]).join('\n');
     const lien = 'https://wa.me/' + BOUTIQUE.whatsapp + '?text=' + encodeURIComponent(msg);
     $('ecran-fini').innerHTML =
       '<div class="merci"><div class="haut"><div class="rond"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F5C55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>' +
         '<h1>Presque fini, ' + esc(etat.nom.trim().split(' ')[0]) + ' !</h1><p>Envoyez votre réservation sur WhatsApp pour que nous la mettions de côté. Au stand, donnez votre nom ou ce code.</p></div>' +
         '<div class="code"><small>Code de retrait</small><b>' + esc(etat.code) + '</b></div>' +
         '<div class="recap">' + etat.panier.map((l) => '<div><span>' + (l.qte > 1 ? l.qte + ' × ' : '') + esc(l.nom + [l.modele, l.couleur, l.taille].filter(Boolean).map((x) => ' · ' + x).join('')) + '</span><span style="white-space:nowrap">' + l.prix * l.qte + ' €</span></div>').join('') +
-          '<hr><div><span style="color:var(--gris)">Retrait</span><b>' + esc((jour.complet || '') + ' · ' + BOUTIQUE.horaires) + '</b></div>' +
+          '<hr><div><span style="color:var(--gris)">Retrait</span><b style="text-align:right">' + esc((jour.complet || '') + ' · ' + (etat.creneau || BOUTIQUE.horaires)) + '</b></div>' +
+          '<div><span style="color:var(--gris)">Lieu</span><b style="text-align:right">' + esc(BOUTIQUE.lieu) + '</b></div>' +
           '<div><span style="color:var(--gris)">À payer au stand</span><b>' + t.total + ' €</b></div></div>' +
         '<p class="note">' + esc(BOUTIQUE.regleReservation) + '</p>' +
         '<a class="btn wa" id="envoyer" href="' + esc(lien) + '" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>' +
+        '<div class="actions"><a class="btn clair" href="' + esc(lienAgenda(jour)) + '" download="retrait-' + esc(etat.code) + '.ics">Ajouter à l’agenda</a>' +
+          '<a class="btn clair" href="' + esc(lienMaps()) + '" target="_blank" rel="noopener">Itinéraire</a></div>' +
         '<button type="button" class="btn clair" id="nouvelle">Nouvelle réservation</button></div>';
   }
 
@@ -479,6 +521,7 @@
     if (b.hasAttribute('data-retour')) return history.back();
     if (b.id === 'confirmer') return confirmer();
     if (b.dataset.jour != null) etat.jour = +b.dataset.jour;
+    if (b.dataset.creneau != null) etat.creneau = etat.creneau === b.dataset.creneau ? '' : b.dataset.creneau;
     if (b.dataset.ligne) {
       etat.panier = etat.panier.map((l) => (l.cle === b.dataset.ligne ? { ...l, qte: l.qte + +b.dataset.d } : l)).filter((l) => l.qte > 0);
       sauver(); rendreCatalogue();
@@ -488,7 +531,7 @@
 
   $('ecran-fini').addEventListener('click', (e) => {
     if (e.target.id === 'nouvelle') {
-      Object.assign(etat, { panier: [], code: '', jour: 0 }); sauver(); rendreCatalogue(); montrer('catalogue');
+      Object.assign(etat, { panier: [], code: '', jour: 0, creneau: '' }); sauver(); rendreCatalogue(); montrer('catalogue');
       history.replaceState(null, '');
     }
   });
