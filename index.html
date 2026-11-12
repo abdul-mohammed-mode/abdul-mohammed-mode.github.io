@@ -153,6 +153,18 @@
   .zoom.zoome img { cursor: zoom-out; }
   .zoom p { margin: 0; padding: 12px 16px calc(20px + env(safe-area-inset-bottom)); color: #CFCAC2; font-size: 13px; text-align: center; }
 
+  .plan { position: fixed; inset: 0; z-index: 25; background: #FFFFFF; display: none; flex-direction: column; }
+  .plan.actif { display: flex; }
+  .plan .haut { padding: calc(14px + env(safe-area-inset-top)) 16px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #E6E1D9; }
+  .plan .haut h1 { margin: 0; font-size: 20px; flex: 1; }
+  .plan .haut .retour { position: static; box-shadow: none; border: 1px solid var(--bord); }
+  #carte { flex: 1; min-height: 0; background: var(--photo); }
+  .plan .infos-plan { padding: 14px 20px calc(18px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #E6E1D9; }
+  .plan .infos-plan p { margin: 0; font-size: 14px; color: var(--gris); line-height: 1.4; }
+  .plan .infos-plan b { color: var(--texte); }
+  .lien-plan { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; border: 0; background: none; padding: 0; color: var(--vert); font-weight: 700; font-size: 13px; text-decoration: underline; cursor: pointer; }
+  .pin-stand { background: var(--vert); color: #FFFFFF; font: 700 13px 'DM Sans', sans-serif; padding: 6px 10px; border-radius: 10px; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.25); position: relative; display: inline-block; transform: translate(-50%, -100%); margin-top: -10px; }
+  .pin-stand::after { content: ''; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: var(--vert); }
   .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 150px; width: calc(100% - 40px); max-width: 440px; padding: 12px 14px; border-radius: 12px; background: var(--texte); color: #FFFFFF; font-size: 14px; display: none; justify-content: space-between; align-items: center; gap: 10px; z-index: 10; }
   .toast.actif { display: flex; }
   .toast button { border: 0; background: none; color: #9FE0D6; font-weight: 700; cursor: pointer; }
@@ -167,6 +179,7 @@
       <p class="marque" data-nom></p>
       <h1>Réservez en ligne, récupérez au stand</h1>
       <p class="infos" id="infos-marche"></p>
+      <button type="button" class="lien-plan" data-plan><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0F5C55" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Voir le plan du stand</button>
     </header>
     <div class="outils">
       <input id="recherche" class="recherche" type="search" placeholder="Abaya, jupe, pyjama, AB-02…" aria-label="Rechercher un article">
@@ -198,6 +211,19 @@
   </div>
   <div class="cadre" id="zoom-cadre"><img id="zoom-img" alt="" draggable="false"></div>
   <p id="zoom-aide">Touchez l’endroit à agrandir</p>
+</div>
+
+<div class="plan" id="plan" role="dialog" aria-label="Plan du stand">
+  <div class="haut">
+    <button type="button" class="retour" id="plan-fermer" aria-label="Fermer le plan"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1B1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h1>Où trouver le stand</h1>
+  </div>
+  <div id="carte"></div>
+  <div class="infos-plan">
+    <p><b id="plan-lieu"></b><br><span id="plan-adresse"></span><br><span id="plan-jours"></span></p>
+    <p id="plan-repere"></p>
+    <a class="btn" id="plan-itineraire" target="_blank" rel="noopener">Itinéraire jusqu’au stand</a>
+  </div>
 </div>
 
 <div class="toast" id="toast"><span id="toast-txt"></span><button type="button" id="toast-voir">Voir</button></div>
@@ -260,7 +286,7 @@
     return out;
   }
 
-  const lienMaps = () => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(BOUTIQUE.adresse || BOUTIQUE.lieu);
+  const lienMaps = () => BOUTIQUE.positionStand ? 'https://www.google.com/maps/dir/?api=1&destination=' + BOUTIQUE.positionStand.join(',') : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(BOUTIQUE.adresse || BOUTIQUE.lieu);
   function lienAgenda(jour) {
     if (!jour) return '';
     const h = (etat.creneau || '').match(/(\d+)h.*?(\d+)h/);
@@ -408,7 +434,7 @@
         '</div><p class="compte">Ça nous aide à préparer votre sac à temps.</p></div>' +
         '<div class="lieu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F5C55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>' +
           '<div class="txt"><b>' + esc(BOUTIQUE.lieu) + '</b><span>' + esc(BOUTIQUE.repereStand || ('Retrait ' + BOUTIQUE.horaires)) + '</span></div>' +
-          '<a href="' + esc(lienMaps()) + '" target="_blank" rel="noopener">Itinéraire</a></div>' +
+          '<a href="#" data-plan>Plan</a></div>' +
         '<div class="bloc"><h2>À quel nom ?</h2>' +
           '<input class="champ" id="nom" autocomplete="name" placeholder="Prénom et nom" value="' + esc(etat.nom) + '">' +
           '<input class="champ" id="tel" type="tel" autocomplete="tel" placeholder="Téléphone (WhatsApp)" value="' + esc(etat.tel) + '"></div>' +
@@ -445,7 +471,7 @@
         '<p class="note">' + esc(BOUTIQUE.regleReservation) + '</p>' +
         '<a class="btn wa" id="envoyer" href="' + esc(lien) + '" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>' +
         '<div class="actions"><a class="btn clair" href="' + esc(lienAgenda(jour)) + '" download="retrait-' + esc(etat.code) + '.ics">Ajouter à l’agenda</a>' +
-          '<a class="btn clair" href="' + esc(lienMaps()) + '" target="_blank" rel="noopener">Itinéraire</a></div>' +
+          '<button type="button" class="btn clair" data-plan>Plan du stand</button></div>' +
         '<button type="button" class="btn clair" id="nouvelle">Nouvelle réservation</button></div>';
   }
 
@@ -480,6 +506,37 @@
   $('zoom-cadre').addEventListener('mousemove', deplacer);
   $('zoom-cadre').addEventListener('touchmove', (e) => { e.preventDefault(); deplacer(e); }, { passive: false });
   $('zoom-fermer').addEventListener('click', () => history.back());
+
+  // ---------- plan du stand ----------
+  let carte = null;
+  function chargerLeaflet() {
+    if (window.L) return Promise.resolve();
+    return new Promise((ok, ko) => {
+      const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(css);
+      const js = document.createElement('script'); js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; js.onload = ok; js.onerror = ko; document.head.appendChild(js);
+    });
+  }
+  function ouvrirPlan() {
+    $('plan-lieu').textContent = BOUTIQUE.lieu + ' — stand ' + BOUTIQUE.nom;
+    $('plan-adresse').textContent = BOUTIQUE.adresse || '';
+    $('plan-jours').textContent = $('infos-marche').textContent.replace(BOUTIQUE.lieu + ' · ', '');
+    $('plan-repere').textContent = BOUTIQUE.repereStand || '';
+    $('plan-repere').style.display = BOUTIQUE.repereStand ? '' : 'none';
+    $('plan-itineraire').href = lienMaps();
+    $('plan').classList.add('actif'); history.pushState({ e: 'plan' }, '');
+    const pos = BOUTIQUE.positionStand || [48.99752, 1.68387];
+    chargerLeaflet().then(() => {
+      if (!carte) {
+        carte = L.map('carte', { zoomControl: true, attributionControl: true }).setView(pos, 18);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(carte);
+        L.circleMarker(pos, { radius: 9, color: '#FFFFFF', weight: 3, fillColor: '#0F5C55', fillOpacity: 1 }).addTo(carte);
+        L.marker(pos, { icon: L.divIcon({ className: '', html: '<span class="pin-stand">' + esc(BOUTIQUE.nom) + '</span>', iconSize: [0, 0] }) }).addTo(carte);
+      }
+      setTimeout(() => carte.invalidateSize(), 50);
+    }).catch(() => { $('carte').innerHTML = '<p style="padding:20px;color:#5E5A55">Le plan ne s’affiche pas. Utilisez le bouton Itinéraire.</p>'; });
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-plan]'); if (b) { e.preventDefault(); ouvrirPlan(); } });
+  $('plan-fermer').addEventListener('click', () => history.back());
 
   // ---------- toast ----------
   let minuteur;
@@ -538,6 +595,7 @@
 
   // bouton « retour » du téléphone
   window.addEventListener('popstate', () => {
+    if ($('plan').classList.contains('actif')) return $('plan').classList.remove('actif');
     if ($('zoom').classList.contains('actif')) return fermerZoom();
     rendreCatalogue(); montrer('catalogue');
   });

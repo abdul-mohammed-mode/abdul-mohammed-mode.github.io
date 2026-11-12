@@ -24,6 +24,9 @@ const BOUTIQUE = {
   heureDebut: 14, heureFin: 17,
   // Adresse utilisée pour le bouton « Itinéraire »
   adresse: 'Rue Denis Diderot, 78200 Mantes-la-Jolie',
+  // Position du stand sur le plan [latitude, longitude]
+  // (pour la changer : appui long sur Google Maps à l'endroit du stand, puis copier les 2 nombres)
+  positionStand: [48.99752, 1.68387],
   // Repère pour trouver le stand (laisser '' si rien à dire)
   repereStand: '',
   // Créneaux proposés pour l'heure de passage
