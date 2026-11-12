@@ -4,6 +4,9 @@
 //  • Changer un prix      : modifier le nombre après  prix:
 //  • Retirer un article   : supprimer tout son bloc { ... },
 //  • Masquer un article   : ajouter  cache: true,
+//  • Article épuisé       : ajouter  epuise: 'tout',
+//  • Couleur/taille épuisée: ajouter  epuise: ['Bordeaux', 'XXXL'],
+//                           (les noms exacts des couleurs ou tailles épuisées)
 //  • Ajouter une couleur  : ajouter une ligne  'Nom': 'photo.jpg',
 //                           (ou  'Nom': null,  s'il n'y a pas de photo)
 //  • Nouvelle photo       : la mettre dans le dossier images/ et écrire
@@ -17,7 +20,24 @@ const BOUTIQUE = {
   whatsapp: '33750579824',            // numéro au format international, sans + ni espaces
   lieu: 'Marché de Mantes-la-Jolie',
   joursDeMarche: ['mardi', 'vendredi', 'dimanche'],
-  horaires: '14h–17h'
+  horaires: '14h–17h',
+  // Règle affichée sur chaque fiche et à la confirmation
+  regleReservation: 'Article gardé jusqu’à 17h le jour choisi. S’il n’est pas récupéré, il est remis en vente.',
+  // Avertissement sous les photos
+  mentionPhoto: 'Photo d’illustration : la couleur et les détails peuvent légèrement varier.'
+};
+
+// Guide des tailles (correspondance indicative, à ajuster)
+const GUIDE_TAILLES = {
+  'M': '38 – 40',
+  'L': '40 – 42',
+  'XL': '42 – 44',
+  'XXL': '44 – 46',
+  'XXXL': '46 – 48',
+  'M/L': '38 – 42',
+  'L/XL': '42 – 46',
+  'XL/XXL': '44 – 48',
+  'Taille unique': '38 à 46 environ'
 };
 
 // Tailles qui reviennent souvent

@@ -6,6 +6,16 @@
 <title>ABDUL Mohammed — Réservez en ligne, récupérez au marché</title>
 <meta name="description" content="Vêtements femme du marché de Mantes-la-Jolie : réservez en ligne, payez et récupérez au stand.">
 <meta name="theme-color" content="#0F5C55">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icone-180.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://abdul-mohammed-mode.github.io/">
+<meta property="og:title" content="ABDUL Mohammed — Vêtements femme, marché de Mantes-la-Jolie">
+<meta property="og:description" content="Abayas, robes, pulls, pyjamas… Réservez en ligne, payez et récupérez au stand (mar., ven. et dim., 14h–17h).">
+<meta property="og:image" content="https://abdul-mohammed-mode.github.io/apercu.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -77,6 +87,15 @@
   .note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--sable); font-size: 13px; line-height: 1.45; color: #3D3A36; }
   .bas { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; border-top: 1px solid #E6E1D9; padding: 12px 20px calc(16px + env(safe-area-inset-bottom)); background: #FFFFFF; display: flex; flex-direction: column; gap: 8px; z-index: 5; }
   .erreur { margin: 0; font-size: 13px; color: var(--rouge); }
+  .choix.epuise { color: #A8A29A; text-decoration: line-through; background: #F7F5F1; cursor: not-allowed; }
+  .badge-epuise { position: absolute; top: 10px; left: 10px; padding: 4px 9px; border-radius: 9px; background: var(--texte); color: #FFFFFF; font-size: 12px; font-weight: 700; }
+  .carte { position: relative; }
+  .mention-photo { margin: 0; padding: 8px 20px 0; font-size: 12px; color: var(--gris); }
+  .lien { align-self: flex-start; border: 0; background: none; padding: 4px 0; color: var(--vert); font-weight: 700; font-size: 14px; text-decoration: underline; cursor: pointer; }
+  .guide { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--sable); border-radius: 12px; overflow: hidden; }
+  .guide th, .guide td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #E6E1D9; }
+  .guide th { font-size: 12px; color: var(--gris); font-weight: 500; }
+  .guide tr:last-child td { border-bottom: 0; }
   .ok { margin: 0; font-size: 13px; color: var(--vert); font-weight: 500; }
   .boutons { display: flex; gap: 10px; }
   .boutons .btn { flex: 1; padding: 0 12px; font-size: 15px; }
@@ -193,7 +212,9 @@
     const nbCouleurs = modeles.reduce((n, m) => n + m.couleurs.length, 0);
     const resume = p.couleurLibre ? p.couleurLibre
       : (nbVariantes > 1 ? nbVariantes + ' modèles · ' : '') + (nbCouleurs === 1 ? modeles[0].couleurs[0].nom : nbCouleurs + ' couleurs');
-    return { ...p, id: i, code: p.code || '', modeles, choix, image, resume, tailles: p.tailles || [] };
+    const epuiseTout = p.epuise === 'tout';
+    const epuises = Array.isArray(p.epuise) ? p.epuise : [];
+    return { ...p, id: i, code: p.code || '', modeles, choix, image, resume: epuiseTout ? 'Épuisé pour le moment' : resume, tailles: p.tailles || [], epuiseTout, epuises };
   });
   const categories = ['Tout'].concat([...new Set(produits.map((p) => p.categorie))]);
 
@@ -243,6 +264,7 @@
     $('grille').innerHTML = liste.length ? liste.map((p) =>
       '<button type="button" class="carte" data-id="' + p.id + '">' +
         (p.image ? '<img class="vignette" loading="lazy" src="' + esc(p.image) + '" alt="' + esc(p.nom) + '">' : '<span class="vide-photo">Photo à venir</span>') +
+        (p.epuiseTout ? '<span class="badge-epuise">Épuisé</span>' : '') +
         '<span class="nom">' + esc(p.nom) + '</span>' +
         '<span class="prix">' + p.prix + ' € ' + (p.offre3pour10 ? '<span class="offre">3 pour 10 €</span>' : '') + '</span>' +
         '<span class="details">' + esc(p.resume) + '</span>' +
@@ -256,8 +278,8 @@
   function ouvrirArticle(id) {
     const p = produits[id];
     Object.assign(etat, { sel: id, modele: 0, choix: {}, qte: 1, erreur: '', ajout: '', couleurTexte: '',
-      couleur: p.modeles[0].couleurs.length === 1 ? p.modeles[0].couleurs[0].nom : '',
-      taille: p.tailles.length === 1 ? p.tailles[0] : '' });
+      couleur: p.modeles[0].couleurs.length === 1 && !p.epuises.includes(p.modeles[0].couleurs[0].nom) ? p.modeles[0].couleurs[0].nom : '',
+      taille: p.tailles.length === 1 && !p.epuises.includes(p.tailles[0]) ? p.tailles[0] : '', guide: false });
     rendreArticle(); montrer('article');
     history.pushState({ e: 'article' }, '');
   }
@@ -274,7 +296,10 @@
     const img = photoActuelle(p);
     const couleurChoisie = m.couleurs.length ? etat.couleur : etat.couleurTexte.trim();
     const sousTotal = p.offre3pour10 ? '' : ' · ' + p.prix * etat.qte + ' €';
-    const puces = (liste, actif, attr, carre) => liste.map((v) => '<button type="button" class="choix' + (carre ? ' carre' : '') + (v === actif ? ' on' : '') + '" ' + attr + '="' + esc(v) + '">' + esc(v) + '</button>').join('');
+    const puces = (liste, actif, attr, carre) => liste.map((v) => p.epuises.includes(v)
+      ? '<button type="button" class="choix epuise' + (carre ? ' carre' : '') + '" disabled aria-label="' + esc(v) + ' épuisé">' + esc(v) + '</button>'
+      : '<button type="button" class="choix' + (carre ? ' carre' : '') + (v === actif ? ' on' : '') + '" ' + attr + '="' + esc(v) + '">' + esc(v) + '</button>').join('');
+    const guide = p.tailles.filter((t) => GUIDE_TAILLES[t]);
     $('ecran-article').innerHTML =
       '<div class="hero">' +
         (img ? '<button type="button" class="hero-btn" id="ouvrir-zoom" aria-label="Agrandir la photo"><img src="' + esc(img) + '" alt="' + esc(p.nom + ' ' + couleurChoisie) + '"></button>' +
@@ -283,9 +308,11 @@
         '<button type="button" class="retour" data-retour aria-label="Retour au catalogue">' + ICONE_RETOUR + '</button>' +
         (p.code ? '<span class="badge-code">' + esc(p.code) + '</span>' : '') +
       '</div>' +
+      (img ? '<p class="mention-photo">' + esc(BOUTIQUE.mentionPhoto) + '</p>' : '') +
       '<div class="fiche">' +
         '<div><h1>' + esc(p.nom) + '</h1><p class="prix-grand">' + p.prix + ' € ' + (p.offre3pour10 ? '<span class="offre">3 pour 10 € (à mélanger)</span>' : '') + '</p>' +
-          (p.description ? '<p class="desc">' + esc(p.description) + '</p>' : '') + '</div>' +
+          (p.description ? '<p class="desc">' + esc(p.description) + '</p>' : '') +
+          (p.epuiseTout ? '<p class="erreur" style="margin-top:8px;font-weight:700">Épuisé pour le moment — revenez bientôt.</p>' : '') + '</div>' +
         (p.modeles.length > 1 ? '<div class="bloc"><h2>Modèle : <span>' + esc(m.nom) + '</span></h2><div class="options">' + puces(p.modeles.map((x) => x.nom), m.nom, 'data-modele', true) + '</div></div>' : '') +
         p.choix.map((c) => '<div class="bloc"><h2>' + esc(c.label) + ' : <span>' + esc(etat.choix[c.label] || 'à choisir') + '</span></h2><div class="options">' +
           c.valeurs.map((v) => '<button type="button" class="choix carre' + (etat.choix[c.label] === v ? ' on' : '') + '" data-choix="' + esc(c.label) + '" data-valeur="' + esc(v) + '">' + esc(v) + '</button>').join('') + '</div></div>').join('') +
@@ -293,21 +320,25 @@
           (m.couleurs.length ? '<div class="options">' + puces(m.couleurs.map((c) => c.nom), etat.couleur, 'data-couleur') + '</div>'
             : '<input class="champ" id="couleur-texte" placeholder="Couleur souhaitée (' + esc(p.couleurLibre || '') + ')" value="' + esc(etat.couleurTexte) + '">') + '</div>' +
         '<div class="bloc"><h2>Taille : <span>' + esc(p.tailles.length ? (etat.taille || 'à choisir') : 'à confirmer au stand') + '</span></h2>' +
-          (p.tailles.length > 1 ? '<div class="options">' + puces(p.tailles, etat.taille, 'data-taille', true) + '</div>' : '') + '</div>' +
+          (p.tailles.length > 1 ? '<div class="options">' + puces(p.tailles, etat.taille, 'data-taille', true) + '</div>' : '') +
+          (guide.length ? '<button type="button" class="lien" id="guide">' + (etat.guide ? 'Masquer le guide des tailles' : 'Guide des tailles') + '</button>' : '') +
+          (etat.guide && guide.length ? '<table class="guide"><tr><th>Taille</th><th>Équivalent</th></tr>' + guide.map((t) => '<tr><td><b>' + esc(t) + '</b></td><td>' + esc(GUIDE_TAILLES[t]) + '</td></tr>').join('') + '</table><p class="compte">Correspondance indicative. Échange possible au stand.</p>' : '') + '</div>' +
         '<div class="bloc ligne-qte"><h2>Quantité</h2><div class="qte"><button type="button" data-qte="-1" aria-label="Retirer un">−</button><span>' + etat.qte + '</span><button type="button" data-qte="1" aria-label="Ajouter un">+</button></div></div>' +
-        '<p class="note">Article mis de côté à votre nom jusqu’au marché choisi. <b>Paiement au stand</b> au moment du retrait. Pas d’essayage, échange possible.</p>' +
+        '<p class="note">Article mis de côté à votre nom jusqu’au marché choisi. <b>Paiement au stand</b> au moment du retrait. Pas d’essayage, échange possible.<br>' + esc(BOUTIQUE.regleReservation) + '</p>' +
       '</div>' +
       '<div class="bas">' + (etat.erreur ? '<p class="erreur" role="alert">' + esc(etat.erreur) + '</p>' : '') +
         (etat.ajout && !etat.erreur ? '<p class="ok" role="status">✓ ' + esc(etat.ajout) + ' — choisissez une autre taille ou couleur pour en ajouter encore.</p>' : '') +
         '<div class="boutons">' +
           (totaux().nb ? '<button type="button" class="btn clair" id="aller-panier">Ma réservation (' + totaux().nb + ')</button>' : '') +
-          '<button type="button" class="btn" id="ajouter">Ajouter ' + etat.qte + sousTotal + '</button>' +
+          (p.epuiseTout ? '<button type="button" class="btn" disabled style="background:#A8A29A;cursor:not-allowed">Épuisé</button>'
+            : '<button type="button" class="btn" id="ajouter">Ajouter ' + etat.qte + sousTotal + '</button>') +
         '</div></div>';
   }
 
   function ajouter() {
     const p = produits[etat.sel]; const m = p.modeles[etat.modele];
     const couleur = m.couleurs.length ? etat.couleur : etat.couleurTexte.trim();
+    if (p.epuiseTout) return;
     const manque = p.choix.find((c) => !etat.choix[c.label]);
     if (manque) return erreurArticle('Choisissez : ' + manque.label.toLowerCase() + '.');
     if (!couleur) return erreurArticle('Choisissez une couleur.');
@@ -371,6 +402,7 @@
         '<div class="recap">' + etat.panier.map((l) => '<div><span>' + (l.qte > 1 ? l.qte + ' × ' : '') + esc(l.nom + [l.modele, l.couleur, l.taille].filter(Boolean).map((x) => ' · ' + x).join('')) + '</span><span style="white-space:nowrap">' + l.prix * l.qte + ' €</span></div>').join('') +
           '<hr><div><span style="color:var(--gris)">Retrait</span><b>' + esc((jour.complet || '') + ' · ' + BOUTIQUE.horaires) + '</b></div>' +
           '<div><span style="color:var(--gris)">À payer au stand</span><b>' + t.total + ' €</b></div></div>' +
+        '<p class="note">' + esc(BOUTIQUE.regleReservation) + '</p>' +
         '<a class="btn wa" id="envoyer" href="' + esc(lien) + '" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>' +
         '<button type="button" class="btn clair" id="nouvelle">Nouvelle réservation</button></div>';
   }
@@ -426,11 +458,12 @@
     if (b.id === 'ouvrir-zoom') return ouvrirZoom();
     if (b.id === 'ajouter') return ajouter();
     if (b.id === 'aller-panier') return allerPanier();
+    if (b.id === 'guide') { etat.guide = !etat.guide; return rendreArticle(); }
     etat.erreur = ''; etat.ajout = '';
     if (b.dataset.modele != null) {
       etat.modele = p.modeles.findIndex((m) => m.nom === b.dataset.modele);
       const cs = p.modeles[etat.modele].couleurs;
-      if (cs.length === 1) etat.couleur = cs[0].nom; else if (!cs.some((c) => c.nom === etat.couleur)) etat.couleur = '';
+      if (cs.length === 1 && !p.epuises.includes(cs[0].nom)) etat.couleur = cs[0].nom; else if (!cs.some((c) => c.nom === etat.couleur)) etat.couleur = '';
     }
     if (b.dataset.choix != null) etat.choix[b.dataset.choix] = b.dataset.valeur;
     if (b.dataset.couleur != null) etat.couleur = b.dataset.couleur;
