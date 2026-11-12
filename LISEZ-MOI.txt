@@ -1,0 +1,28 @@
+SITE « ABDUL Mohammed » — comment le modifier
+==============================================
+
+Le site tient dans 3 éléments :
+  index.html   → l'appli (ne pas toucher)
+  produits.js  → les articles, prix, couleurs, tailles, numéro WhatsApp (À MODIFIER)
+  images/      → les photos
+
+CHANGER UN PRIX, UNE COULEUR, UNE TAILLE
+  Ouvrir produits.js, modifier la ligne voulue, enregistrer.
+  Exemples :
+    prix: 10,                    → prix: 12,
+    'Noir': 'vel-noir.jpg',      → ajouter une couleur avec sa photo
+    'Blanc': null,               → couleur sans photo
+    cache: true,                 → ajouter cette ligne pour cacher un article épuisé
+
+AJOUTER UNE PHOTO
+  Mettre le fichier .jpg dans le dossier images/ (nom sans espace ni accent,
+  ex. robe-rouge.jpg), puis écrire ce nom dans produits.js.
+
+AJOUTER UN ARTICLE
+  Copier un bloc { ... }, du même genre, le coller juste en dessous,
+  et changer le nom, le prix, les couleurs.
+  Attention aux virgules : chaque bloc se termine par },
+
+VÉRIFIER
+  Ouvrir le site sur le téléphone. Si la page reste blanche, il manque
+  sûrement une virgule ou un guillemet dans produits.js.

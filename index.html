@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ABDUL Mohammed — Réservez en ligne, récupérez au marché</title>
+<meta name="description" content="Vêtements femme du marché de Mantes-la-Jolie : réservez en ligne, payez et récupérez au stand.">
+<meta name="theme-color" content="#0F5C55">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --vert: #0F5C55; --vert-fonce: #0A403B; --texte: #1C1B1A; --gris: #5E5A55; --bord: #D9D4CC; --sable: #F4F1EC; --photo: #E9E4DC; --rouge: #A3361F; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #ECE8E1; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; color: var(--texte); -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; }
+  .app { max-width: 480px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; background: #FFFFFF; position: relative; display: flex; flex-direction: column; }
+  .ecran { display: none; flex: 1; flex-direction: column; }
+  .ecran.actif { display: flex; }
+
+  /* Catalogue */
+  .entete { padding: 26px 20px 14px; display: flex; flex-direction: column; gap: 4px; background: var(--sable); }
+  .marque { margin: 0; font-size: 13px; font-weight: 700; color: var(--vert); letter-spacing: 0.04em; text-transform: uppercase; }
+  .entete h1 { margin: 0; font-size: 25px; line-height: 1.15; }
+  .entete p.infos { margin: 6px 0 0; font-size: 13px; color: var(--gris); }
+  .outils { padding: 12px 20px 6px; display: flex; flex-direction: column; gap: 10px; position: sticky; top: 0; background: #FFFFFF; z-index: 2; }
+  .recherche { height: 44px; border: 1px solid var(--bord); border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; background: #FFFFFF; width: 100%; }
+  .puces { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .puces::-webkit-scrollbar { display: none; }
+  .puce { flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 18px; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; background: #FFFFFF; border: 1px solid var(--bord); }
+  .puce.on, .choix.on { background: var(--vert); color: #FFFFFF; border-color: var(--vert); }
+  .compte { margin: 0; font-size: 13px; color: var(--gris); }
+  .grille { padding: 4px 20px 110px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 14px; }
+  .carte { display: flex; flex-direction: column; gap: 4px; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; }
+  .carte .vignette { width: 100%; aspect-ratio: 4 / 5; border-radius: 14px; object-fit: cover; object-position: center 25%; background: var(--photo); display: block; }
+  .vide-photo { width: 100%; aspect-ratio: 4 / 5; border-radius: 14px; background: var(--photo); display: flex; align-items: center; justify-content: center; color: var(--gris); font-size: 12px; }
+  .carte .nom { font-size: 14px; font-weight: 500; line-height: 1.25; margin-top: 2px; }
+  .carte .prix { font-size: 15px; font-weight: 700; }
+  .offre { font-size: 12px; font-weight: 500; color: var(--vert); }
+  .carte .details { font-size: 12px; color: var(--gris); }
+  .aucun { grid-column: 1 / -1; text-align: center; color: var(--gris); font-size: 14px; padding: 24px 0; }
+
+  .barre { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; border-top: 1px solid #E6E1D9; padding: 10px 20px calc(14px + env(safe-area-inset-bottom)); display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #FFFFFF; z-index: 5; }
+  .barre span { font-size: 14px; color: var(--gris); }
+  .btn { height: 52px; border-radius: 14px; border: 0; background: var(--vert); color: #FFFFFF; font-weight: 700; font-size: 16px; cursor: pointer; padding: 0 18px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+  .btn:hover { background: var(--vert-fonce); }
+  .btn.petit { height: 44px; font-size: 15px; }
+  .btn.clair { background: #FFFFFF; color: var(--texte); border: 1px solid var(--bord); font-weight: 500; }
+  .btn.wa { background: #1F8A4C; }
+
+  /* Article */
+  .hero { position: relative; background: var(--photo); flex-shrink: 0; }
+  .hero-btn { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+  .hero img { width: 100%; aspect-ratio: 1 / 1; max-height: 62vh; object-fit: cover; object-position: center 30%; display: block; }
+  .hero .vide-photo { aspect-ratio: 1 / 1; border-radius: 0; }
+  .retour { position: absolute; top: 16px; left: 16px; width: 44px; height: 44px; border-radius: 22px; border: 0; background: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+  .badge-code { position: absolute; bottom: 14px; left: 16px; padding: 4px 10px; border-radius: 10px; background: #FFFFFF; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; }
+  .badge-zoom { position: absolute; bottom: 14px; right: 16px; height: 32px; padding: 0 12px; border-radius: 16px; background: rgba(28,27,26,0.72); color: #FFFFFF; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; pointer-events: none; }
+  .fiche { padding: 16px 20px 140px; display: flex; flex-direction: column; gap: 18px; }
+  .fiche h1 { margin: 0; font-size: 22px; }
+  .fiche .prix-grand { margin: 4px 0 0; font-size: 20px; font-weight: 700; }
+  .fiche .desc { margin: 4px 0 0; font-size: 14px; line-height: 1.45; color: var(--gris); }
+  .bloc { display: flex; flex-direction: column; gap: 8px; }
+  .bloc h2 { margin: 0; font-size: 15px; }
+  .bloc h2 span { font-weight: 500; color: var(--gris); }
+  .options { display: flex; flex-wrap: wrap; gap: 8px; }
+  .choix { min-height: 40px; padding: 0 14px; border-radius: 20px; font-size: 14px; font-weight: 500; cursor: pointer; background: #FFFFFF; border: 1px solid var(--bord); }
+  .choix.carre { border-radius: 12px; font-weight: 700; min-width: 56px; height: 44px; }
+  .champ { height: 44px; border: 1px solid var(--bord); border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; width: 100%; }
+  .bloc.ligne-qte { flex-direction: row; align-items: center; justify-content: space-between; }
+  .qte { display: flex; align-items: center; gap: 4px; border: 1px solid var(--bord); border-radius: 12px; padding: 2px; }
+  .qte button { width: 40px; height: 40px; border: 0; border-radius: 10px; background: var(--sable); font-size: 20px; font-weight: 700; cursor: pointer; }
+  .qte span { min-width: 32px; text-align: center; font-weight: 700; font-size: 16px; }
+  .qte.petit button { width: 32px; height: 32px; font-size: 17px; }
+  .qte.petit span { min-width: 22px; font-size: 14px; }
+  .note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--sable); font-size: 13px; line-height: 1.45; color: #3D3A36; }
+  .bas { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; border-top: 1px solid #E6E1D9; padding: 12px 20px calc(16px + env(safe-area-inset-bottom)); background: #FFFFFF; display: flex; flex-direction: column; gap: 8px; z-index: 5; }
+  .erreur { margin: 0; font-size: 13px; color: var(--rouge); }
+
+  /* Panier */
+  .titre-ecran { padding: 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #E6E1D9; }
+  .titre-ecran h1 { margin: 0; font-size: 20px; }
+  .titre-ecran .retour { position: static; box-shadow: none; border: 1px solid var(--bord); }
+  .contenu { padding: 14px 20px 150px; display: flex; flex-direction: column; gap: 20px; }
+  .ligne { display: flex; gap: 12px; align-items: center; }
+  .ligne img, .ligne .mini { width: 56px; height: 68px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--photo); }
+  .ligne .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .ligne .txt b { font-size: 14px; }
+  .ligne .txt span { font-size: 13px; color: var(--gris); }
+  .jours { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .jour { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px; border-radius: 12px; cursor: pointer; background: #FFFFFF; border: 1px solid var(--bord); font-size: 14px; }
+  .jour.on { border: 2px solid var(--vert); }
+  .jour small { font-size: 12px; color: var(--gris); }
+  .total { padding: 12px 14px; border-radius: 12px; background: var(--sable); display: flex; flex-direction: column; gap: 4px; }
+  .total div { display: flex; justify-content: space-between; font-size: 15px; }
+
+  /* Fini */
+  .merci { padding: 48px 20px 40px; display: flex; flex-direction: column; gap: 20px; }
+  .merci .haut { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+  .rond { width: 72px; height: 72px; border-radius: 36px; background: #E3F0EE; display: flex; align-items: center; justify-content: center; }
+  .merci h1 { margin: 0; font-size: 26px; }
+  .merci p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--gris); }
+  .code { align-self: center; padding: 14px 28px; border-radius: 14px; border: 2px dashed var(--vert); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .code small { font-size: 12px; color: var(--gris); text-transform: uppercase; letter-spacing: 0.06em; }
+  .code b { font-size: 30px; letter-spacing: 0.08em; color: var(--vert); }
+  .recap { border-radius: 16px; background: var(--sable); padding: 16px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+  .recap div { display: flex; justify-content: space-between; gap: 12px; }
+  .recap hr { border: 0; height: 1px; background: #E0DAD0; margin: 0; width: 100%; }
+
+  /* Zoom */
+  .zoom { position: fixed; inset: 0; z-index: 20; background: #111110; display: none; flex-direction: column; }
+  .zoom.actif { display: flex; }
+  .zoom .haut { padding: calc(14px + env(safe-area-inset-top)) 16px 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; color: #FFFFFF; font-weight: 700; }
+  .zoom .fermer { width: 44px; height: 44px; flex-shrink: 0; border-radius: 22px; border: 0; background: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .zoom .cadre { flex: 1; min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; touch-action: none; }
+  .zoom img { width: 100%; max-width: 900px; height: auto; user-select: none; -webkit-user-drag: none; transition: transform 0.15s ease-out; cursor: zoom-in; }
+  .zoom.zoome img { cursor: zoom-out; }
+  .zoom p { margin: 0; padding: 12px 16px calc(20px + env(safe-area-inset-bottom)); color: #CFCAC2; font-size: 13px; text-align: center; }
+
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 90px; width: calc(100% - 40px); max-width: 440px; padding: 12px 14px; border-radius: 12px; background: var(--texte); color: #FFFFFF; font-size: 14px; display: none; justify-content: space-between; align-items: center; gap: 10px; z-index: 10; }
+  .toast.actif { display: flex; }
+  .toast button { border: 0; background: none; color: #9FE0D6; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 1. CATALOGUE -->
+  <section class="ecran actif" id="ecran-catalogue">
+    <header class="entete">
+      <p class="marque" data-nom></p>
+      <h1>Réservez en ligne, récupérez au stand</h1>
+      <p class="infos" id="infos-marche"></p>
+    </header>
+    <div class="outils">
+      <input id="recherche" class="recherche" type="search" placeholder="Abaya, jupe, pyjama, AB-02…" aria-label="Rechercher un article">
+      <div class="puces" id="categories"></div>
+      <p class="compte" id="compte"></p>
+    </div>
+    <div class="grille" id="grille"></div>
+    <nav class="barre">
+      <span id="resume-panier">Aucun article réservé</span>
+      <button class="btn petit" id="voir-panier" type="button">Ma réservation</button>
+    </nav>
+  </section>
+
+  <!-- 2. ARTICLE -->
+  <section class="ecran" id="ecran-article"></section>
+
+  <!-- 3. PANIER -->
+  <section class="ecran" id="ecran-panier"></section>
+
+  <!-- 4. CONFIRMATION -->
+  <section class="ecran" id="ecran-fini"></section>
+</div>
+
+<div class="zoom" id="zoom" role="dialog" aria-label="Photo agrandie">
+  <div class="haut"><span id="zoom-titre"></span>
+    <button class="fermer" id="zoom-fermer" type="button" aria-label="Fermer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1B1A" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="cadre" id="zoom-cadre"><img id="zoom-img" alt="" draggable="false"></div>
+  <p id="zoom-aide">Touchez l’endroit à agrandir</p>
+</div>
+
+<div class="toast" id="toast"><span id="toast-txt"></span><button type="button" id="toast-voir">Voir</button></div>
+
+<script src="produits.js"></script>
+<script>
+(function () {
+  // ---------- outils ----------
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const photo = (f) => (f ? 'images/' + f : '');
+  const norm = (t) => (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const ICONE_RETOUR = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1B1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
+
+  // ---------- préparation des produits ----------
+  const produits = PRODUITS.filter((p) => !p.cache).map((p, i) => {
+    const modeles = p.modeles
+      ? Object.entries(p.modeles).map(([nom, c]) => ({ nom, couleurs: Object.entries(c).map(([n, f]) => ({ nom: n, photo: photo(f) })) }))
+      : [{ nom: '', couleurs: Object.entries(p.couleurs || {}).map(([n, f]) => ({ nom: n, photo: photo(f) })) }];
+    const premiere = (modeles[0].couleurs.find((c) => c.photo) || {}).photo;
+    const image = p.photoPrincipale ? photo(p.photoPrincipale) : (premiere || '');
+    const choix = p.choix ? Object.entries(p.choix).map(([label, valeurs]) => ({ label, valeurs })) : [];
+    const nbVariantes = modeles.length > 1 ? modeles.length : choix.reduce((n, c) => n * c.valeurs.length, 1);
+    const nbCouleurs = modeles.reduce((n, m) => n + m.couleurs.length, 0);
+    const resume = p.couleurLibre ? p.couleurLibre
+      : (nbVariantes > 1 ? nbVariantes + ' modèles · ' : '') + (nbCouleurs === 1 ? modeles[0].couleurs[0].nom : nbCouleurs + ' couleurs');
+    return { ...p, id: i, code: p.code || '', modeles, choix, image, resume, tailles: p.tailles || [] };
+  });
+  const categories = ['Tout'].concat([...new Set(produits.map((p) => p.categorie))]);
+
+  // ---------- état ----------
+  const etat = { cat: 'Tout', q: '', sel: null, modele: 0, couleur: '', couleurTexte: '', taille: '', choix: {}, qte: 1, erreur: '', panier: [], jour: 0, nom: '', tel: '', code: '' };
+  try { const s = JSON.parse(localStorage.getItem('panier-abdul') || 'null'); if (Array.isArray(s)) etat.panier = s; } catch (e) {}
+  const sauver = () => { try { localStorage.setItem('panier-abdul', JSON.stringify(etat.panier)); } catch (e) {} };
+
+  function montrer(ecran) {
+    document.querySelectorAll('.ecran').forEach((e) => e.classList.toggle('actif', e.id === 'ecran-' + ecran));
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- jours de marché ----------
+  function joursMarche() {
+    const noms = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+    const mois = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+    const voulus = BOUTIQUE.joursDeMarche.map((j) => noms.indexOf(norm(j)));
+    const now = new Date(); const out = [];
+    for (let k = 0; out.length < 3 && k < 21; k++) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + k);
+      if (!voulus.includes(d.getDay())) continue;
+      if (k === 0 && now.getHours() >= 16) continue;
+      const nom = noms[d.getDay()][0].toUpperCase() + noms[d.getDay()].slice(1);
+      out.push({ jour: k === 0 ? "Aujourd'hui" : nom, date: d.getDate() + ' ' + mois[d.getMonth()], complet: nom + ' ' + d.getDate() + ' ' + mois[d.getMonth()] });
+    }
+    return out;
+  }
+
+  // ---------- totaux (offre 3 pour 10 €) ----------
+  function totaux() {
+    let lot = 0, autre = 0;
+    etat.panier.forEach((l) => { if (l.lot) lot += l.qte; else autre += l.prix * l.qte; });
+    const totalLot = Math.floor(lot / 3) * 10 + (lot % 3) * 4;
+    return { total: autre + totalLot, eco: lot * 4 - totalLot, nb: etat.panier.reduce((n, l) => n + l.qte, 0) };
+  }
+
+  // ---------- 1. catalogue ----------
+  function rendreCatalogue() {
+    document.querySelectorAll('[data-nom]').forEach((e) => (e.textContent = BOUTIQUE.nom));
+    const jours = BOUTIQUE.joursDeMarche.map((j) => j.slice(0, 3) + '.').join(', ').replace(/, ([^,]*)$/, ' et $1');
+    $('infos-marche').textContent = BOUTIQUE.lieu + ' · ' + jours + ' · ' + BOUTIQUE.horaires;
+    $('categories').innerHTML = categories.map((c) => '<button type="button" class="puce' + (c === etat.cat ? ' on' : '') + '" data-cat="' + esc(c) + '">' + esc(c) + '</button>').join('');
+    const q = norm(etat.q.trim());
+    const liste = produits.filter((p) => (etat.cat === 'Tout' || p.categorie === etat.cat) && (!q || norm(p.nom + ' ' + p.code + ' ' + p.resume + ' ' + p.categorie + ' ' + p.modeles.map((m) => m.couleurs.map((c) => c.nom).join(' ')).join(' ')).includes(q)));
+    $('compte').textContent = liste.length + ' article' + (liste.length > 1 ? 's' : '');
+    $('grille').innerHTML = liste.length ? liste.map((p) =>
+      '<button type="button" class="carte" data-id="' + p.id + '">' +
+        (p.image ? '<img class="vignette" loading="lazy" src="' + esc(p.image) + '" alt="' + esc(p.nom) + '">' : '<span class="vide-photo">Photo à venir</span>') +
+        '<span class="nom">' + esc(p.nom) + '</span>' +
+        '<span class="prix">' + p.prix + ' € ' + (p.offre3pour10 ? '<span class="offre">3 pour 10 €</span>' : '') + '</span>' +
+        '<span class="details">' + esc(p.resume) + '</span>' +
+      '</button>').join('') : '<p class="aucun">Aucun article trouvé. Essayez un autre mot.</p>';
+    const t = totaux();
+    $('resume-panier').textContent = t.nb ? t.nb + ' article' + (t.nb > 1 ? 's' : '') + ' · ' + t.total + ' €' : 'Aucun article réservé';
+    $('voir-panier').textContent = t.nb ? 'Ma réservation (' + t.nb + ')' : 'Ma réservation';
+  }
+
+  // ---------- 2. article ----------
+  function ouvrirArticle(id) {
+    const p = produits[id];
+    Object.assign(etat, { sel: id, modele: 0, choix: {}, qte: 1, erreur: '', couleurTexte: '',
+      couleur: p.modeles[0].couleurs.length === 1 ? p.modeles[0].couleurs[0].nom : '',
+      taille: p.tailles.length === 1 ? p.tailles[0] : '' });
+    rendreArticle(); montrer('article');
+    history.pushState({ e: 'article' }, '');
+  }
+
+  function photoActuelle(p) {
+    const m = p.modeles[etat.modele];
+    const c = m.couleurs.find((x) => x.nom === etat.couleur);
+    if (c) return c.photo || p.image;
+    return (m.couleurs.find((x) => x.photo) || {}).photo || p.image;
+  }
+
+  function rendreArticle() {
+    const p = produits[etat.sel]; const m = p.modeles[etat.modele];
+    const img = photoActuelle(p);
+    const couleurChoisie = m.couleurs.length ? etat.couleur : etat.couleurTexte.trim();
+    const sousTotal = p.offre3pour10 ? '' : ' · ' + p.prix * etat.qte + ' €';
+    const puces = (liste, actif, attr, carre) => liste.map((v) => '<button type="button" class="choix' + (carre ? ' carre' : '') + (v === actif ? ' on' : '') + '" ' + attr + '="' + esc(v) + '">' + esc(v) + '</button>').join('');
+    $('ecran-article').innerHTML =
+      '<div class="hero">' +
+        (img ? '<button type="button" class="hero-btn" id="ouvrir-zoom" aria-label="Agrandir la photo"><img src="' + esc(img) + '" alt="' + esc(p.nom + ' ' + couleurChoisie) + '"></button>' +
+          '<span class="badge-zoom"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg>Zoomer</span>'
+          : '<div class="vide-photo">Photo à venir</div>') +
+        '<button type="button" class="retour" data-retour aria-label="Retour au catalogue">' + ICONE_RETOUR + '</button>' +
+        (p.code ? '<span class="badge-code">' + esc(p.code) + '</span>' : '') +
+      '</div>' +
+      '<div class="fiche">' +
+        '<div><h1>' + esc(p.nom) + '</h1><p class="prix-grand">' + p.prix + ' € ' + (p.offre3pour10 ? '<span class="offre">3 pour 10 € (à mélanger)</span>' : '') + '</p>' +
+          (p.description ? '<p class="desc">' + esc(p.description) + '</p>' : '') + '</div>' +
+        (p.modeles.length > 1 ? '<div class="bloc"><h2>Modèle : <span>' + esc(m.nom) + '</span></h2><div class="options">' + puces(p.modeles.map((x) => x.nom), m.nom, 'data-modele', true) + '</div></div>' : '') +
+        p.choix.map((c) => '<div class="bloc"><h2>' + esc(c.label) + ' : <span>' + esc(etat.choix[c.label] || 'à choisir') + '</span></h2><div class="options">' +
+          c.valeurs.map((v) => '<button type="button" class="choix carre' + (etat.choix[c.label] === v ? ' on' : '') + '" data-choix="' + esc(c.label) + '" data-valeur="' + esc(v) + '">' + esc(v) + '</button>').join('') + '</div></div>').join('') +
+        '<div class="bloc"><h2>Couleur : <span>' + esc(couleurChoisie || (m.couleurs.length ? 'à choisir' : 'précisez')) + '</span></h2>' +
+          (m.couleurs.length ? '<div class="options">' + puces(m.couleurs.map((c) => c.nom), etat.couleur, 'data-couleur') + '</div>'
+            : '<input class="champ" id="couleur-texte" placeholder="Couleur souhaitée (' + esc(p.couleurLibre || '') + ')" value="' + esc(etat.couleurTexte) + '">') + '</div>' +
+        '<div class="bloc"><h2>Taille : <span>' + esc(p.tailles.length ? (etat.taille || 'à choisir') : 'à confirmer au stand') + '</span></h2>' +
+          (p.tailles.length > 1 ? '<div class="options">' + puces(p.tailles, etat.taille, 'data-taille', true) + '</div>' : '') + '</div>' +
+        '<div class="bloc ligne-qte"><h2>Quantité</h2><div class="qte"><button type="button" data-qte="-1" aria-label="Retirer un">−</button><span>' + etat.qte + '</span><button type="button" data-qte="1" aria-label="Ajouter un">+</button></div></div>' +
+        '<p class="note">Article mis de côté à votre nom jusqu’au marché choisi. <b>Paiement au stand</b> au moment du retrait. Pas d’essayage, échange possible.</p>' +
+      '</div>' +
+      '<div class="bas">' + (etat.erreur ? '<p class="erreur" role="alert">' + esc(etat.erreur) + '</p>' : '') +
+        '<button type="button" class="btn" id="ajouter">Ajouter ' + etat.qte + ' à ma réservation' + sousTotal + '</button></div>';
+  }
+
+  function ajouter() {
+    const p = produits[etat.sel]; const m = p.modeles[etat.modele];
+    const couleur = m.couleurs.length ? etat.couleur : etat.couleurTexte.trim();
+    const manque = p.choix.find((c) => !etat.choix[c.label]);
+    if (manque) return erreurArticle('Choisissez : ' + manque.label.toLowerCase() + '.');
+    if (!couleur) return erreurArticle('Choisissez une couleur.');
+    if (p.tailles.length && !etat.taille) return erreurArticle('Choisissez une taille.');
+    const modele = p.modeles.length > 1 ? m.nom : p.choix.map((c) => c.label + ' ' + etat.choix[c.label].toLowerCase()).join(' · ');
+    const pareil = etat.panier.find((l) => l.id === p.id && l.modele === modele && l.couleur === couleur && l.taille === etat.taille);
+    if (pareil) pareil.qte += etat.qte;
+    else etat.panier.push({ cle: Date.now() + '-' + p.id, id: p.id, nom: p.nom, code: p.code, prix: p.prix, lot: !!p.offre3pour10, modele, couleur, taille: etat.taille, qte: etat.qte, photo: photoActuelle(p) });
+    sauver(); rendreCatalogue(); montrer('catalogue');
+    toast(etat.qte + ' × ' + p.nom + ' ajouté' + (etat.qte > 1 ? 's' : ''));
+  }
+  function erreurArticle(t) { etat.erreur = t; rendreArticle(); }
+
+  // ---------- 3. panier ----------
+  function rendrePanier() {
+    const t = totaux(); const jours = joursMarche();
+    const lignes = etat.panier.map((l) =>
+      '<div class="ligne">' + (l.photo ? '<img src="' + esc(l.photo) + '" alt="">' : '<span class="mini"></span>') +
+      '<div class="txt"><b>' + esc(l.nom) + '</b><span>' + esc([l.modele, l.couleur, l.taille].filter(Boolean).join(' · ')) + '</span><span>' + (l.qte > 1 ? l.qte + ' × ' : '') + l.prix + ' €' + (l.lot ? ' · lot 3 pour 10 €' : '') + '</span></div>' +
+      '<div class="qte petit"><button type="button" data-ligne="' + l.cle + '" data-d="-1" aria-label="Retirer un">−</button><span>' + l.qte + '</span><button type="button" data-ligne="' + l.cle + '" data-d="1" aria-label="Ajouter un">+</button></div></div>').join('');
+    $('ecran-panier').innerHTML =
+      '<div class="titre-ecran"><button type="button" class="retour" data-retour aria-label="Retour au catalogue">' + ICONE_RETOUR + '</button><h1>Ma réservation</h1></div>' +
+      (t.nb === 0 ? '<div class="contenu" style="align-items:center;text-align:center;padding-top:48px"><p style="color:var(--gris)">Aucun article pour l’instant.</p><button type="button" class="btn petit clair" data-retour>Voir le catalogue</button></div>' :
+      '<div class="contenu">' + '<div class="bloc">' + lignes + '</div>' +
+        '<div class="bloc"><h2>Je récupère au marché le…</h2><div class="jours">' +
+          jours.map((j, i) => '<button type="button" class="jour' + (i === etat.jour ? ' on' : '') + '" data-jour="' + i + '"><b>' + esc(j.jour) + '</b><small>' + esc(j.date) + '</small></button>').join('') +
+        '</div><p class="compte">' + esc(BOUTIQUE.lieu) + ' · retrait ' + esc(BOUTIQUE.horaires) + '</p></div>' +
+        '<div class="bloc"><h2>À quel nom ?</h2>' +
+          '<input class="champ" id="nom" autocomplete="name" placeholder="Prénom et nom" value="' + esc(etat.nom) + '">' +
+          '<input class="champ" id="tel" type="tel" autocomplete="tel" placeholder="Téléphone (WhatsApp)" value="' + esc(etat.tel) + '"></div>' +
+        '<div class="total"><div><span>À payer au stand</span><b>' + t.total + ' €</b></div>' + (t.eco > 0 ? '<span class="offre">Offre 3 pour 10 € appliquée : −' + t.eco + ' €</span>' : '') + '</div>' +
+      '</div>' +
+      '<div class="bas">' + (etat.erreur ? '<p class="erreur" role="alert">' + esc(etat.erreur) + '</p>' : '') + '<button type="button" class="btn" id="confirmer">Confirmer la réservation</button></div>');
+  }
+
+  function confirmer() {
+    etat.nom = ($('nom') || {}).value || etat.nom; etat.tel = ($('tel') || {}).value || etat.tel;
+    if (!etat.nom.trim()) { etat.erreur = 'Indiquez votre nom pour la mise de côté.'; return rendrePanier(); }
+    if (etat.tel.replace(/\D/g, '').length < 10) { etat.erreur = 'Indiquez un numéro de téléphone valide.'; return rendrePanier(); }
+    const lettres = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let code = 'K-';
+    for (let i = 0; i < 4; i++) code += lettres[Math.floor(Math.random() * lettres.length)];
+    etat.code = code; etat.erreur = '';
+    rendreFini(); montrer('fini');
+  }
+
+  // ---------- 4. confirmation ----------
+  function rendreFini() {
+    const t = totaux(); const jour = joursMarche()[etat.jour] || {};
+    const msg = ['Bonjour ' + BOUTIQUE.nom + ', je réserve :']
+      .concat(etat.panier.map((l) => '- ' + l.qte + ' × ' + l.nom + (l.code ? ' (' + l.code + ')' : '') + [l.modele, l.couleur, l.taille].filter(Boolean).map((x) => ' · ' + x).join('') + ' · ' + l.prix + ' €'))
+      .concat(['Total à payer au stand : ' + t.total + ' €', 'Retrait : ' + (jour.complet || '') + ', ' + BOUTIQUE.horaires + ', ' + BOUTIQUE.lieu, 'Nom : ' + etat.nom.trim(), 'Tél. : ' + etat.tel.trim(), 'Code : ' + etat.code]).join('\n');
+    const lien = 'https://wa.me/' + BOUTIQUE.whatsapp + '?text=' + encodeURIComponent(msg);
+    $('ecran-fini').innerHTML =
+      '<div class="merci"><div class="haut"><div class="rond"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F5C55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>' +
+        '<h1>Presque fini, ' + esc(etat.nom.trim().split(' ')[0]) + ' !</h1><p>Envoyez votre réservation sur WhatsApp pour que nous la mettions de côté. Au stand, donnez votre nom ou ce code.</p></div>' +
+        '<div class="code"><small>Code de retrait</small><b>' + esc(etat.code) + '</b></div>' +
+        '<div class="recap">' + etat.panier.map((l) => '<div><span>' + (l.qte > 1 ? l.qte + ' × ' : '') + esc(l.nom + [l.modele, l.couleur, l.taille].filter(Boolean).map((x) => ' · ' + x).join('')) + '</span><span style="white-space:nowrap">' + l.prix * l.qte + ' €</span></div>').join('') +
+          '<hr><div><span style="color:var(--gris)">Retrait</span><b>' + esc((jour.complet || '') + ' · ' + BOUTIQUE.horaires) + '</b></div>' +
+          '<div><span style="color:var(--gris)">À payer au stand</span><b>' + t.total + ' €</b></div></div>' +
+        '<a class="btn wa" id="envoyer" href="' + esc(lien) + '" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>' +
+        '<button type="button" class="btn clair" id="nouvelle">Nouvelle réservation</button></div>';
+  }
+
+  // ---------- zoom ----------
+  const zoom = { actif: false, zoome: false };
+  function ouvrirZoom() {
+    const p = produits[etat.sel];
+    $('zoom-img').src = photoActuelle(p); $('zoom-img').alt = p.nom;
+    $('zoom-titre').textContent = p.nom + (etat.couleur ? ' · ' + etat.couleur : '');
+    zoom.zoome = false; appliquerZoom(50, 30);
+    $('zoom').classList.add('actif'); history.pushState({ e: 'zoom' }, '');
+  }
+  function fermerZoom() { $('zoom').classList.remove('actif'); }
+  function origine(e) {
+    const t = e.touches && e.touches[0] ? e.touches[0] : e;
+    const r = $('zoom-img').getBoundingClientRect();
+    const w = r.width / (zoom.zoome ? 2.6 : 1), h = r.height / (zoom.zoome ? 2.6 : 1);
+    const box = $('zoom-cadre').getBoundingClientRect();
+    const left = box.left + (box.width - w) / 2, top = box.top + (box.height - h) / 2;
+    const c = (v) => Math.max(0, Math.min(100, v));
+    return [c(((t.clientX - left) / w) * 100), c(((t.clientY - top) / h) * 100)];
+  }
+  function appliquerZoom(x, y) {
+    const img = $('zoom-img');
+    img.style.transformOrigin = x + '% ' + y + '%';
+    img.style.transform = 'scale(' + (zoom.zoome ? 2.6 : 1) + ')';
+    $('zoom').classList.toggle('zoome', zoom.zoome);
+    $('zoom-aide').textContent = zoom.zoome ? 'Glissez le doigt pour vous déplacer · touchez pour dézoomer' : 'Touchez l’endroit à agrandir';
+  }
+  $('zoom-cadre').addEventListener('click', (e) => { const [x, y] = origine(e); zoom.zoome = !zoom.zoome; appliquerZoom(x, y); });
+  const deplacer = (e) => { if (!zoom.zoome) return; const [x, y] = origine(e); $('zoom-img').style.transformOrigin = x + '% ' + y + '%'; };
+  $('zoom-cadre').addEventListener('mousemove', deplacer);
+  $('zoom-cadre').addEventListener('touchmove', (e) => { e.preventDefault(); deplacer(e); }, { passive: false });
+  $('zoom-fermer').addEventListener('click', () => history.back());
+
+  // ---------- toast ----------
+  let minuteur;
+  function toast(t) { $('toast-txt').textContent = t; $('toast').classList.add('actif'); clearTimeout(minuteur); minuteur = setTimeout(() => $('toast').classList.remove('actif'), 2600); }
+
+  // ---------- événements ----------
+  $('recherche').addEventListener('input', (e) => { etat.q = e.target.value; rendreCatalogue(); });
+  $('categories').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) { etat.cat = b.dataset.cat; rendreCatalogue(); } });
+  $('grille').addEventListener('click', (e) => { const b = e.target.closest('[data-id]'); if (b) ouvrirArticle(+b.dataset.id); });
+  const allerPanier = () => { etat.erreur = ''; $('toast').classList.remove('actif'); rendrePanier(); montrer('panier'); history.pushState({ e: 'panier' }, ''); };
+  $('voir-panier').addEventListener('click', allerPanier);
+  $('toast-voir').addEventListener('click', allerPanier);
+
+  $('ecran-article').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    const p = produits[etat.sel];
+    if (b.hasAttribute('data-retour')) return history.back();
+    if (b.id === 'ouvrir-zoom') return ouvrirZoom();
+    if (b.id === 'ajouter') return ajouter();
+    etat.erreur = '';
+    if (b.dataset.modele != null) {
+      etat.modele = p.modeles.findIndex((m) => m.nom === b.dataset.modele);
+      const cs = p.modeles[etat.modele].couleurs;
+      if (cs.length === 1) etat.couleur = cs[0].nom; else if (!cs.some((c) => c.nom === etat.couleur)) etat.couleur = '';
+    }
+    if (b.dataset.choix != null) etat.choix[b.dataset.choix] = b.dataset.valeur;
+    if (b.dataset.couleur != null) etat.couleur = b.dataset.couleur;
+    if (b.dataset.taille != null) etat.taille = b.dataset.taille;
+    if (b.dataset.qte != null) etat.qte = Math.max(1, Math.min(10, etat.qte + +b.dataset.qte));
+    rendreArticle();
+  });
+  $('ecran-article').addEventListener('input', (e) => { if (e.target.id === 'couleur-texte') { etat.couleurTexte = e.target.value; } });
+
+  $('ecran-panier').addEventListener('input', (e) => { if (e.target.id === 'nom') etat.nom = e.target.value; if (e.target.id === 'tel') etat.tel = e.target.value; });
+  $('ecran-panier').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-retour')) return history.back();
+    if (b.id === 'confirmer') return confirmer();
+    if (b.dataset.jour != null) etat.jour = +b.dataset.jour;
+    if (b.dataset.ligne) {
+      etat.panier = etat.panier.map((l) => (l.cle === b.dataset.ligne ? { ...l, qte: l.qte + +b.dataset.d } : l)).filter((l) => l.qte > 0);
+      sauver(); rendreCatalogue();
+    }
+    etat.erreur = ''; rendrePanier();
+  });
+
+  $('ecran-fini').addEventListener('click', (e) => {
+    if (e.target.id === 'nouvelle') {
+      Object.assign(etat, { panier: [], code: '', jour: 0 }); sauver(); rendreCatalogue(); montrer('catalogue');
+      history.replaceState(null, '');
+    }
+  });
+
+  // bouton « retour » du téléphone
+  window.addEventListener('popstate', () => {
+    if ($('zoom').classList.contains('actif')) return fermerZoom();
+    rendreCatalogue(); montrer('catalogue');
+  });
+
+  rendreCatalogue();
+})();
+</script>
+</body>
+</html>
