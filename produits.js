@@ -23,7 +23,7 @@ const BOUTIQUE = {
   horaires: '14h–17h',
   heureDebut: 14, heureFin: 17,
   // Adresse utilisée pour le bouton « Itinéraire »
-  adresse: 'Marché du Val Fourré, rue Boileau, 78200 Mantes-la-Jolie',
+  adresse: 'Rue Denis Diderot, 78200 Mantes-la-Jolie',
   // Repère pour trouver le stand (laisser '' si rien à dire)
   repereStand: '',
   // Créneaux proposés pour l'heure de passage
