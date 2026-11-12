@@ -36,7 +36,21 @@ const BOUTIQUE = {
     ],
     entreLesParties: 'Rue Boileau',
     coteGauche: 'Rue Denis Diderot',
-    coteDroit: 'Rue Jean Racine'
+    coteDroit: 'Rue Jean Racine',
+    enHaut: 'Rue La Fontaine',
+    enBas: 'Avenue du Général de Gaulle',
+    // Repères autour du marché. cote : 'gauche' ou 'droite' ;
+    // detail : petite ligne en dessous (\n = retour à la ligne)
+    // de / a : position verticale de 0 (tout en haut) à 1 (tout en bas)
+    reperes: [
+      { nom: 'Mairie de quartier', detail: '', cote: 'droite', de: 0.03, a: 0.20, type: 'mairie' },
+      { nom: 'École maternelle', detail: 'Les Gentianes', cote: 'droite', de: 0.25, a: 0.45, type: 'ecole' },
+      { nom: 'Aire de jeux', detail: '', cote: 'droite', de: 0.63, a: 0.76, type: 'jeux' },
+      { nom: 'Terrains de basket', detail: '', cote: 'gauche', de: 0.50, a: 0.62, type: 'sport' },
+      { nom: 'Gymnase Louis Lécuyer', detail: 'Toilettes\n0,50 € / pers.', cote: 'gauche', de: 0.66, a: 0.90, type: 'gymnase' }
+    ],
+    // Feux tricolores : coin 'bas-gauche', 'bas-droite', 'haut-gauche' ou 'haut-droite'
+    feux: ['bas-gauche', 'bas-droite']
   },
   // Emplacement(s) du stand sur ce plan (cliquer sur le plan en mode modification
   // — adresse du site suivie de ?modifier — puis recopier le code affiché ici)

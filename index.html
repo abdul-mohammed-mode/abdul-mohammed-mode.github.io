@@ -162,7 +162,7 @@
   .onglets { display: flex; gap: 6px; padding: 10px 16px; border-bottom: 1px solid #E6E1D9; }
   .onglet { flex: 1; height: 38px; border-radius: 10px; border: 1px solid var(--bord); background: #FFFFFF; font-weight: 700; font-size: 14px; cursor: pointer; }
   .onglet.on { background: var(--vert); border-color: var(--vert); color: #FFFFFF; }
-  #schema { flex: 1; min-height: 0; overflow: auto; background: #F7F5F1; display: flex; justify-content: center; padding: 12px 0 24px; }
+  #schema { flex: 1; min-height: 0; overflow: auto; background: #F7F5F1; display: flex; justify-content: center; align-items: flex-start; padding: 8px 6px 24px; }
   #schema svg { display: block; }
   #schema .case { cursor: default; }
   .edition #schema .case { cursor: pointer; }
@@ -568,18 +568,19 @@
   try { if (EDITION) { const s2 = JSON.parse(localStorage.getItem('stand-edition') || 'null'); if (Array.isArray(s2)) casesStand = s2; } } catch (e) {}
   function dessinerSchema() {
     const cfg = BOUTIQUE.planMarche || { parties: [{ nom: 'Partie 1', cases: 14 }, { nom: 'Partie 2', cases: 14 }] };
-    const C = 26, AL = 26, AP = 40, RUE = 46, M = 54, ENT = 34;
-    // colonnes : case | allée | case case | allée principale | case case | allée | case
+    const C = 22, AL = 22, AP = 34, RUE = 30, SIDE = 64, RS = 26, TOP = 52, BOT = 58;
     const cols = [['c', 1], ['a', 1], ['c', 2], ['c', 3], ['p', 2], ['c', 4], ['c', 5], ['a', 3], ['c', 6]];
     const largeur = cols.reduce((w, [t]) => w + (t === 'c' ? C : t === 'p' ? AP : AL), 0);
-    const W = largeur + 2 * M;
-    let y = ENT, out = [];
-    const txt = (x, yy, t, opts) => '<text x="' + x + '" y="' + yy + '" ' + (opts || '') + ' font-family="DM Sans, sans-serif">' + esc(t) + '</text>';
-    out.push(txt(W / 2, 20, 'Nord ↑', 'text-anchor="middle" font-size="12" fill="#8A847C" font-weight="700"'));
+    const X0 = SIDE + RS + 8;
+    const W = largeur + 2 * X0;
+    const out = [], dessus = [];
+    const txt = (x, yy, t, o) => '<text x="' + x + '" y="' + yy + '" ' + (o || '') + ' font-family="DM Sans, sans-serif">' + esc(t) + '</text>';
+    let y = TOP;
+    const debutMarche = y;
     cfg.parties.forEach((part, pi) => {
       const H = part.cases * C;
-      out.push('<rect x="' + (M - 6) + '" y="' + (y - 6) + '" width="' + (largeur + 12) + '" height="' + (H + 12) + '" rx="10" fill="#FFFFFF" stroke="#D9D4CC"/>');
-      let x = M;
+      out.push('<rect x="' + (X0 - 5) + '" y="' + (y - 5) + '" width="' + (largeur + 10) + '" height="' + (H + 10) + '" rx="8" fill="#FFFFFF" stroke="#D9D4CC"/>');
+      let x = X0;
       cols.forEach(([t, n]) => {
         const w = t === 'c' ? C : t === 'p' ? AP : AL;
         if (t === 'c') {
@@ -590,37 +591,76 @@
           }
         } else {
           out.push('<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + H + '" fill="' + (t === 'p' ? '#FBEFD9' : '#FAF8F4') + '"/>');
-          out.push(txt(x + w / 2, y + H / 2, t === 'p' ? 'Allée principale' : 'Allée', 'text-anchor="middle" font-size="' + (t === 'p' ? 12 : 10) + '" font-weight="' + (t === 'p' ? 700 : 500) + '" fill="' + (t === 'p' ? '#9A6A1C' : '#A8A29A') + '" transform="rotate(-90 ' + (x + w / 2) + ' ' + (y + H / 2) + ')" dominant-baseline="middle"'));
+          out.push(txt(x + w / 2, y + H / 2, t === 'p' ? 'Allée principale' : 'Allée', 'text-anchor="middle" dominant-baseline="middle" font-size="' + (t === 'p' ? 11 : 9) + '" font-weight="' + (t === 'p' ? 700 : 500) + '" fill="' + (t === 'p' ? '#9A6A1C' : '#A8A29A') + '" transform="rotate(-90 ' + (x + w / 2) + ' ' + (y + H / 2) + ')"'));
         }
         x += w;
       });
-      out.push(txt(W / 2, y - 12, part.nom, 'text-anchor="middle" font-size="13" font-weight="700" fill="#1C1B1A"'));
+      dessus.push(txt(W / 2, y - 10, part.nom, 'text-anchor="middle" font-size="12" font-weight="700" fill="#1C1B1A"'));
       y += H;
       if (pi < cfg.parties.length - 1) {
-        out.push('<rect x="0" y="' + (y + 10) + '" width="' + W + '" height="' + (RUE - 20) + '" fill="#CFC9C0"/>');
-        out.push(txt(W / 2, y + RUE / 2 + 4, cfg.entreLesParties || '', 'text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF"'));
-        y += RUE + 14;
+        out.push('<rect x="' + (SIDE) + '" y="' + (y + 8) + '" width="' + (W - 2 * SIDE) + '" height="' + RUE + '" fill="#CFC9C0"/>');
+        out.push(txt(W / 2, y + 8 + RUE / 2, cfg.entreLesParties || '', 'text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="#FFFFFF"'));
+        y += RUE + 30;
       }
     });
-    const Ht = y + 16;
-    // rues sur les côtés
-    out.unshift('<rect x="0" y="' + ENT + '" width="' + (M - 18) + '" height="' + (Ht - ENT - 10) + '" fill="#CFC9C0"/>' + '<rect x="' + (W - M + 18) + '" y="' + ENT + '" width="' + (M - 18) + '" height="' + (Ht - ENT - 10) + '" fill="#CFC9C0"/>');
-    out.push(txt((M - 18) / 2, Ht / 2, cfg.coteGauche || '', 'text-anchor="middle" font-size="11" font-weight="700" fill="#FFFFFF" transform="rotate(-90 ' + (M - 18) / 2 + ' ' + Ht / 2 + ')"'));
-    out.push(txt(W - (M - 18) / 2, Ht / 2, cfg.coteDroit || '', 'text-anchor="middle" font-size="11" font-weight="700" fill="#FFFFFF" transform="rotate(90 ' + (W - (M - 18) / 2) + ' ' + Ht / 2 + ')"'));
-    // étiquette "Mon stand"
+    const finMarche = y;
+    const Ht = y + BOT;
+    const rue = (x, yy, w, h) => '<rect x="' + x + '" y="' + yy + '" width="' + w + '" height="' + h + '" fill="#CFC9C0"/>';
+    // rues
+    const fond = [];
+    fond.push(rue(SIDE, 14, RS, Ht - 14));
+    fond.push(rue(W - SIDE - RS, 14, RS, finMarche - 14 + 20));
+    fond.push(rue(0, 14, W, 24));
+    fond.push(rue(0, Ht - 36, W, 28));
+    fond.push(txt(W / 2, 26, cfg.enHaut || '', 'text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="#FFFFFF"'));
+    fond.push(txt(W / 2, Ht - 22, cfg.enBas || '', 'text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="#FFFFFF"'));
+    const mg = (debutMarche + finMarche) / 2;
+    fond.push(txt(SIDE + RS / 2, mg, cfg.coteGauche || '', 'text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="#FFFFFF" transform="rotate(-90 ' + (SIDE + RS / 2) + ' ' + mg + ')"'));
+    fond.push(txt(W - SIDE - RS / 2, (debutMarche + finMarche) / 2 - 60, cfg.coteDroit || '', 'text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="#FFFFFF" transform="rotate(90 ' + (W - SIDE - RS / 2) + ' ' + ((debutMarche + finMarche) / 2 - 60) + ')"'));
+    // repères
+    const couleurs = { mairie: ['#DCE7F5', '#2F5E9E'], ecole: ['#FDEBC8', '#A0660A'], gymnase: ['#DDEFE6', '#1F7A4D'], sport: ['#E5F1E9', '#3B8A5E'], jeux: ['#F6E3EF', '#9C3F78'], autre: ['#ECE8E1', '#5E5A55'] };
+    const icone = (type, cx, cy, col) => {
+      if (type === 'ecole') return '<path d="M' + (cx - 7) + ' ' + (cy - 1) + ' L' + cx + ' ' + (cy - 6) + ' L' + (cx + 7) + ' ' + (cy - 1) + ' M' + (cx - 5) + ' ' + (cy - 1) + ' V' + (cy + 5) + ' H' + (cx + 5) + ' V' + (cy - 1) + '" fill="none" stroke="' + col + '" stroke-width="1.8" stroke-linejoin="round"/>';
+      if (type === 'mairie') return '<path d="M' + (cx - 7) + ' ' + (cy + 5) + ' H' + (cx + 7) + ' M' + (cx - 5) + ' ' + (cy + 4) + ' V' + (cy - 1) + ' M' + cx + ' ' + (cy + 4) + ' V' + (cy - 1) + ' M' + (cx + 5) + ' ' + (cy + 4) + ' V' + (cy - 1) + ' M' + (cx - 7) + ' ' + (cy - 2) + ' L' + cx + ' ' + (cy - 7) + ' L' + (cx + 7) + ' ' + (cy - 2) + ' Z" fill="none" stroke="' + col + '" stroke-width="1.6" stroke-linejoin="round"/>';
+      if (type === 'gymnase' || type === 'sport') return '<circle cx="' + cx + '" cy="' + cy + '" r="6" fill="none" stroke="' + col + '" stroke-width="1.8"/><path d="M' + (cx - 6) + ' ' + cy + ' H' + (cx + 6) + ' M' + cx + ' ' + (cy - 6) + ' V' + (cy + 6) + '" stroke="' + col + '" stroke-width="1.4"/>';
+      if (type === 'jeux') return '<path d="M' + (cx - 6) + ' ' + (cy + 6) + ' L' + (cx - 2) + ' ' + (cy - 6) + ' L' + (cx + 2) + ' ' + (cy - 6) + ' L' + (cx + 6) + ' ' + (cy + 6) + ' M' + (cx - 3) + ' ' + (cy - 1) + ' H' + (cx + 3) + '" fill="none" stroke="' + col + '" stroke-width="1.8" stroke-linejoin="round"/>';
+      return '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="' + col + '"/>';
+    };
+    const zoneH = finMarche - debutMarche + 20;
+    (cfg.reperes || []).forEach((rp) => {
+      const [bg, fg] = couleurs[rp.type] || couleurs.autre;
+      const y1 = debutMarche - 10 + rp.de * zoneH, y2 = debutMarche - 10 + rp.a * zoneH, h = Math.max(46, y2 - y1);
+      const x = rp.cote === 'gauche' ? 4 : W - SIDE + 4, w = SIDE - 8, cx = x + w / 2;
+      fond.push('<rect x="' + x + '" y="' + y1 + '" width="' + w + '" height="' + h + '" rx="7" fill="' + bg + '" stroke="' + fg + '" stroke-opacity="0.35"/>');
+      fond.push(icone(rp.type, cx, y1 + 14, fg));
+      const mots = rp.nom.split(' ');
+      const lignes = []; let l = '';
+      mots.forEach((m) => { if ((l + ' ' + m).trim().length > 10) { if (l) lignes.push(l); l = m; } else l = (l + ' ' + m).trim(); });
+      if (l) lignes.push(l);
+      lignes.forEach((t, i) => fond.push(txt(cx, y1 + 32 + i * 11, t, 'text-anchor="middle" font-size="9.5" font-weight="700" fill="' + fg + '"')));
+      if (rp.detail) {
+        const dy = y1 + 32 + lignes.length * 11 + 2;
+        const dd = rp.detail.split('\n');
+        dd.forEach((t, i) => fond.push(txt(cx, dy + i * 10, t, 'text-anchor="middle" font-size="8.5" fill="' + fg + '"')));
+      }
+    });
+    // feux tricolores
+    const feu = (cx, cy) => '<g><rect x="' + (cx - 5) + '" y="' + (cy - 12) + '" width="10" height="24" rx="3" fill="#2B2A28"/><circle cx="' + cx + '" cy="' + (cy - 6) + '" r="2.6" fill="#E5483B"/><circle cx="' + cx + '" cy="' + cy + '" r="2.6" fill="#F2B233"/><circle cx="' + cx + '" cy="' + (cy + 6) + '" r="2.6" fill="#3DBA6A"/></g>';
+    const coins = { 'bas-gauche': [SIDE + RS / 2, Ht - 22], 'bas-droite': [W - SIDE - RS / 2, Ht - 22], 'haut-gauche': [SIDE + RS / 2, 26], 'haut-droite': [W - SIDE - RS / 2, 26] };
+    (cfg.feux || []).forEach((c) => { if (coins[c]) fond.push(feu(coins[c][0], coins[c][1])); });
+    fond.push(txt(W - 8, 10, 'N ↑', 'text-anchor="end" font-size="10" font-weight="700" fill="#8A847C"'));
+    $('schema').innerHTML = '<svg width="100%" style="max-width:' + Math.round(W * 1.15) + 'px" viewBox="0 0 ' + W + ' ' + Ht + '" role="img" aria-label="Plan du marché">' + fond.join('') + out.join('') + dessus.join('') + '</svg>';
     const first = casesStand[0];
-    $('schema').innerHTML = '<svg width="' + W + '" height="' + Ht + '" viewBox="0 0 ' + W + ' ' + Ht + '" role="img" aria-label="Plan du marché">' + out.join('') + '</svg>';
     if (first) {
       const r = $('schema').querySelector('[data-case="' + first + '"]');
       if (r) {
         const bx = +r.getAttribute('x') + C / 2, by = +r.getAttribute('y');
-        const lab = BOUTIQUE.nom;
-        const tw = lab.length * 7 + 18;
+        const lab = BOUTIQUE.nom, tw = lab.length * 6.4 + 16;
         const lx = Math.max(4, Math.min(W - tw - 4, bx - tw / 2));
         $('schema').querySelector('svg').insertAdjacentHTML('beforeend',
-          '<g pointer-events="none"><rect x="' + lx + '" y="' + (by - 30) + '" width="' + tw + '" height="22" rx="6" fill="#D32F2F"/>' +
-          '<path d="M' + (bx - 6) + ' ' + (by - 8) + ' L' + bx + ' ' + (by - 1) + ' L' + (bx + 6) + ' ' + (by - 8) + ' Z" fill="#D32F2F"/>' +
-          txt(lx + tw / 2, by - 15, lab, 'text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF"') + '</g>');
+          '<g pointer-events="none"><rect x="' + lx + '" y="' + (by - 28) + '" width="' + tw + '" height="20" rx="6" fill="#D32F2F"/>' +
+          '<path d="M' + (bx - 5) + ' ' + (by - 8) + ' L' + bx + ' ' + (by - 2) + ' L' + (bx + 5) + ' ' + (by - 8) + ' Z" fill="#D32F2F"/>' +
+          txt(lx + tw / 2, by - 14, lab, 'text-anchor="middle" font-size="11" font-weight="700" fill="#FFFFFF"') + '</g>');
       }
     }
     $('code-stand').textContent = "standCases: [" + casesStand.map((c) => "'" + c + "'").join(', ') + '],';
