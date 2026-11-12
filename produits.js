@@ -26,14 +26,19 @@ const BOUTIQUE = {
   adresse: 'Rue Denis Diderot, 78200 Mantes-la-Jolie',
   // Position du stand sur le plan [latitude, longitude]
   // (pour la changer : appui long sur Google Maps à l'endroit du stand, puis copier les 2 nombres)
-  positionStand: [48.99826, 1.68418],
+  positionStand: [48.99849, 1.68423],
   // Plan du marché vu du dessus : 2 parties, 3 allées chacune (celle du milieu = principale)
-  // cases = nombre d'emplacements de 4 m² le long de chaque allée
+  // Mesures prises sur la carte (OpenStreetMap) :
+  //   partie nord ≈ 136 m × 40 m  → 136 ÷ 4 m = 34 emplacements par rangée
+  //   partie sud  ≈ 103 m × 41 m  → 103 ÷ 4 m = 25 emplacements par rangée
+  //   largeur : 6 rangées × 3 m = 18 m de stands + allées (≈ 6 m, 10 m pour la principale, 6 m)
   planMarche: {
     parties: [
-      { nom: 'Partie nord', cases: 16 },
-      { nom: 'Partie sud', cases: 12 }
+      { nom: 'Partie nord', cases: 34 },
+      { nom: 'Partie sud', cases: 25 }
     ],
+    largeurAllee: 6,
+    largeurAlleePrincipale: 10,
     entreLesParties: 'Rue Boileau',
     coteGauche: 'Rue Denis Diderot',
     coteDroit: 'Rue Jean Racine',

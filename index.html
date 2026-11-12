@@ -568,9 +568,10 @@
   try { if (EDITION) { const s2 = JSON.parse(localStorage.getItem('stand-edition') || 'null'); if (Array.isArray(s2)) casesStand = s2; } } catch (e) {}
   function dessinerSchema() {
     const cfg = BOUTIQUE.planMarche || { parties: [{ nom: 'Partie 1', cases: 14 }, { nom: 'Partie 2', cases: 14 }] };
-    const C = 22, AL = 22, AP = 34, RUE = 30, SIDE = 64, RS = 26, TOP = 52, BOT = 58;
+    // échelle : 5 px = 1 m ; un emplacement = 4 m (le long de l'allée) × 3 m
+    const PX = 5, CW = 3 * PX, CH = 4 * PX, AL = (cfg.largeurAllee || 6) * PX, AP = (cfg.largeurAlleePrincipale || 10) * PX, RUE = 30, SIDE = 64, RS = 26, TOP = 52, BOT = 58;
     const cols = [['c', 1], ['a', 1], ['c', 2], ['c', 3], ['p', 2], ['c', 4], ['c', 5], ['a', 3], ['c', 6]];
-    const largeur = cols.reduce((w, [t]) => w + (t === 'c' ? C : t === 'p' ? AP : AL), 0);
+    const largeur = cols.reduce((w, [t]) => w + (t === 'c' ? CW : t === 'p' ? AP : AL), 0);
     const X0 = SIDE + RS + 8;
     const W = largeur + 2 * X0;
     const out = [], dessus = [];
@@ -578,16 +579,16 @@
     let y = TOP;
     const debutMarche = y;
     cfg.parties.forEach((part, pi) => {
-      const H = part.cases * C;
+      const H = part.cases * CH;
       out.push('<rect x="' + (X0 - 5) + '" y="' + (y - 5) + '" width="' + (largeur + 10) + '" height="' + (H + 10) + '" rx="8" fill="#FFFFFF" stroke="#D9D4CC"/>');
       let x = X0;
       cols.forEach(([t, n]) => {
-        const w = t === 'c' ? C : t === 'p' ? AP : AL;
+        const w = t === 'c' ? CW : t === 'p' ? AP : AL;
         if (t === 'c') {
           for (let r = 0; r < part.cases; r++) {
             const id = (pi + 1) + '-' + n + '-' + (r + 1);
             const on = casesStand.includes(id);
-            out.push('<rect class="case' + (on ? ' stand' : '') + '" data-case="' + id + '" x="' + (x + 1) + '" y="' + (y + r * C + 1) + '" width="' + (C - 2) + '" height="' + (C - 2) + '" rx="3" fill="' + (on ? '#D32F2F' : '#E9E4DC') + '" stroke="' + (on ? '#8E1B1B' : '#D6CFC4') + '"/>');
+            out.push('<rect class="case' + (on ? ' stand' : '') + '" data-case="' + id + '" x="' + (x + 1) + '" y="' + (y + r * CH + 1) + '" width="' + (CW - 2) + '" height="' + (CH - 2) + '" rx="2" fill="' + (on ? '#D32F2F' : '#E9E4DC') + '" stroke="' + (on ? '#8E1B1B' : '#D6CFC4') + '"/>');
           }
         } else {
           out.push('<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + H + '" fill="' + (t === 'p' ? '#FBEFD9' : '#FAF8F4') + '"/>');
@@ -659,7 +660,7 @@
     if (first) {
       const r = $('schema').querySelector('[data-case="' + first + '"]');
       if (r) {
-        const bx = +r.getAttribute('x') + C / 2, by = +r.getAttribute('y');
+        const bx = +r.getAttribute('x') + CW / 2, by = +r.getAttribute('y');
         const lab = BOUTIQUE.nom, tw = lab.length * 6.4 + 16;
         const lx = Math.max(4, Math.min(W - tw - 4, bx - tw / 2));
         $('schema').querySelector('svg').insertAdjacentHTML('beforeend',
