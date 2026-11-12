@@ -57,7 +57,7 @@
   .retour { position: absolute; top: 16px; left: 16px; width: 44px; height: 44px; border-radius: 22px; border: 0; background: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
   .badge-code { position: absolute; bottom: 14px; left: 16px; padding: 4px 10px; border-radius: 10px; background: #FFFFFF; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; }
   .badge-zoom { position: absolute; bottom: 14px; right: 16px; height: 32px; padding: 0 12px; border-radius: 16px; background: rgba(28,27,26,0.72); color: #FFFFFF; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; pointer-events: none; }
-  .fiche { padding: 16px 20px 140px; display: flex; flex-direction: column; gap: 18px; }
+  .fiche { padding: 16px 20px 200px; display: flex; flex-direction: column; gap: 18px; }
   .fiche h1 { margin: 0; font-size: 22px; }
   .fiche .prix-grand { margin: 4px 0 0; font-size: 20px; font-weight: 700; }
   .fiche .desc { margin: 4px 0 0; font-size: 14px; line-height: 1.45; color: var(--gris); }
@@ -77,6 +77,10 @@
   .note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--sable); font-size: 13px; line-height: 1.45; color: #3D3A36; }
   .bas { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; border-top: 1px solid #E6E1D9; padding: 12px 20px calc(16px + env(safe-area-inset-bottom)); background: #FFFFFF; display: flex; flex-direction: column; gap: 8px; z-index: 5; }
   .erreur { margin: 0; font-size: 13px; color: var(--rouge); }
+  .ok { margin: 0; font-size: 13px; color: var(--vert); font-weight: 500; }
+  .boutons { display: flex; gap: 10px; }
+  .boutons .btn { flex: 1; padding: 0 12px; font-size: 15px; }
+  .boutons .btn.clair { flex: 0 0 auto; }
 
   /* Panier */
   .titre-ecran { padding: 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #E6E1D9; }
@@ -118,7 +122,7 @@
   .zoom.zoome img { cursor: zoom-out; }
   .zoom p { margin: 0; padding: 12px 16px calc(20px + env(safe-area-inset-bottom)); color: #CFCAC2; font-size: 13px; text-align: center; }
 
-  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 90px; width: calc(100% - 40px); max-width: 440px; padding: 12px 14px; border-radius: 12px; background: var(--texte); color: #FFFFFF; font-size: 14px; display: none; justify-content: space-between; align-items: center; gap: 10px; z-index: 10; }
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 150px; width: calc(100% - 40px); max-width: 440px; padding: 12px 14px; border-radius: 12px; background: var(--texte); color: #FFFFFF; font-size: 14px; display: none; justify-content: space-between; align-items: center; gap: 10px; z-index: 10; }
   .toast.actif { display: flex; }
   .toast button { border: 0; background: none; color: #9FE0D6; font-weight: 700; cursor: pointer; }
 </style>
@@ -251,7 +255,7 @@
   // ---------- 2. article ----------
   function ouvrirArticle(id) {
     const p = produits[id];
-    Object.assign(etat, { sel: id, modele: 0, choix: {}, qte: 1, erreur: '', couleurTexte: '',
+    Object.assign(etat, { sel: id, modele: 0, choix: {}, qte: 1, erreur: '', ajout: '', couleurTexte: '',
       couleur: p.modeles[0].couleurs.length === 1 ? p.modeles[0].couleurs[0].nom : '',
       taille: p.tailles.length === 1 ? p.tailles[0] : '' });
     rendreArticle(); montrer('article');
@@ -294,7 +298,11 @@
         '<p class="note">Article mis de côté à votre nom jusqu’au marché choisi. <b>Paiement au stand</b> au moment du retrait. Pas d’essayage, échange possible.</p>' +
       '</div>' +
       '<div class="bas">' + (etat.erreur ? '<p class="erreur" role="alert">' + esc(etat.erreur) + '</p>' : '') +
-        '<button type="button" class="btn" id="ajouter">Ajouter ' + etat.qte + ' à ma réservation' + sousTotal + '</button></div>';
+        (etat.ajout && !etat.erreur ? '<p class="ok" role="status">✓ ' + esc(etat.ajout) + ' — choisissez une autre taille ou couleur pour en ajouter encore.</p>' : '') +
+        '<div class="boutons">' +
+          (totaux().nb ? '<button type="button" class="btn clair" id="aller-panier">Ma réservation (' + totaux().nb + ')</button>' : '') +
+          '<button type="button" class="btn" id="ajouter">Ajouter ' + etat.qte + sousTotal + '</button>' +
+        '</div></div>';
   }
 
   function ajouter() {
@@ -308,8 +316,12 @@
     const pareil = etat.panier.find((l) => l.id === p.id && l.modele === modele && l.couleur === couleur && l.taille === etat.taille);
     if (pareil) pareil.qte += etat.qte;
     else etat.panier.push({ cle: Date.now() + '-' + p.id, id: p.id, nom: p.nom, code: p.code, prix: p.prix, lot: !!p.offre3pour10, modele, couleur, taille: etat.taille, qte: etat.qte, photo: photoActuelle(p) });
-    sauver(); rendreCatalogue(); montrer('catalogue');
-    toast(etat.qte + ' × ' + p.nom + ' ajouté' + (etat.qte > 1 ? 's' : ''));
+    const ajoutes = etat.qte;
+    sauver(); rendreCatalogue();
+    // on reste sur l'article : modèle et couleur gardés, taille et quantité remises à zéro
+    etat.qte = 1; if (p.tailles.length > 1) etat.taille = '';
+    etat.ajout = ajoutes + ' × ' + [modele, couleur, pareil ? pareil.taille : etat.panier[etat.panier.length - 1].taille].filter(Boolean).join(' · ') + ' ajouté' + (ajoutes > 1 ? 's' : '');
+    rendreArticle();
   }
   function erreurArticle(t) { etat.erreur = t; rendreArticle(); }
 
@@ -413,7 +425,8 @@
     if (b.hasAttribute('data-retour')) return history.back();
     if (b.id === 'ouvrir-zoom') return ouvrirZoom();
     if (b.id === 'ajouter') return ajouter();
-    etat.erreur = '';
+    if (b.id === 'aller-panier') return allerPanier();
+    etat.erreur = ''; etat.ajout = '';
     if (b.dataset.modele != null) {
       etat.modele = p.modeles.findIndex((m) => m.nom === b.dataset.modele);
       const cs = p.modeles[etat.modele].couleurs;
