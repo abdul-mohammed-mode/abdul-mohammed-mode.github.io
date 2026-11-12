@@ -26,7 +26,7 @@ const BOUTIQUE = {
   adresse: 'Rue Denis Diderot, 78200 Mantes-la-Jolie',
   // Position du stand sur le plan [latitude, longitude]
   // (pour la changer : appui long sur Google Maps à l'endroit du stand, puis copier les 2 nombres)
-  positionStand: [48.99849, 1.68423],
+  positionStand: [48.99835, 1.68418],
   // Plan du marché vu du dessus : 2 parties, 3 allées chacune (celle du milieu = principale)
   // Mesures prises sur la carte (OpenStreetMap) :
   //   partie nord ≈ 136 m × 40 m  → 136 ÷ 4 m = 34 emplacements par rangée
@@ -60,9 +60,9 @@ const BOUTIQUE = {
   },
   // Emplacement(s) du stand sur ce plan (cliquer sur le plan en mode modification
   // — adresse du site suivie de ?modifier — puis recopier le code affiché ici)
-  standCases: ['1-1-5', '1-1-6', '1-1-7'],
+  standCases: ['1-1-9', '1-1-10', '1-1-11'],
   // Repère pour trouver le stand (laisser '' si rien à dire)
-  repereStand: 'Partie nord, 1re rangée côté rue Denis Diderot, 5e emplacement en venant de la rue La Fontaine (près du double feu).',
+  repereStand: 'Partie nord, 1re rangée côté rue Denis Diderot, 9e emplacement en venant de la rue La Fontaine (le double feu derrière vous).',
   // Créneaux proposés pour l'heure de passage
   creneaux: ['14h – 15h', '15h – 16h', '16h – 17h'],
   // Nombre de jours de marché proposés
