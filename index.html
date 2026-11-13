@@ -95,6 +95,15 @@
   .note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--sable); font-size: 13px; line-height: 1.45; color: #3D3A36; }
   .bas { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; border-top: 1px solid #E6E1D9; padding: 12px 20px calc(16px + env(safe-area-inset-bottom)); background: #FFFFFF; display: flex; flex-direction: column; gap: 8px; z-index: 5; }
   .erreur { margin: 0; font-size: 13px; color: var(--rouge); }
+  .vignettes { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; margin: 0 -20px; padding-left: 20px; padding-right: 20px; scroll-snap-type: x proximity; scrollbar-width: thin; }
+  .vignette-couleur { flex: 0 0 76px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 4px; padding: 3px; border-radius: 12px; border: 2px solid transparent; background: #FFFFFF; cursor: pointer; text-align: center; }
+  .vignette-couleur img, .vignette-couleur .sans-photo { width: 66px; height: 88px; border-radius: 9px; object-fit: cover; object-position: center 25%; background: var(--photo); display: block; }
+  .vignette-couleur .sans-photo { display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--gris); line-height: 1.2; }
+  .vignette-couleur .nom-couleur { font-size: 11.5px; font-weight: 500; line-height: 1.2; min-height: 28px; }
+  .vignette-couleur.on { border-color: var(--vert); }
+  .vignette-couleur.on .nom-couleur { color: var(--vert); font-weight: 700; }
+  .vignette-couleur.epuise { opacity: 0.45; cursor: not-allowed; }
+  .vignette-couleur.epuise .nom-couleur { text-decoration: line-through; }
   .choix.epuise { color: #A8A29A; text-decoration: line-through; background: #F7F5F1; cursor: not-allowed; }
   .badge-epuise { position: absolute; top: 10px; left: 10px; padding: 4px 9px; border-radius: 9px; background: var(--texte); color: #FFFFFF; font-size: 12px; font-weight: 700; }
   .carte { position: relative; }
@@ -394,7 +403,7 @@
   // ---------- 2. article ----------
   function ouvrirArticle(id) {
     const p = produits[id];
-    Object.assign(etat, { sel: id, modele: 0, choix: {}, qte: 1, erreur: '', ajout: '', couleurTexte: '',
+    Object.assign(etat, { sel: id, modele: 0, choix: {}, qte: 1, erreur: '', ajout: '', defilVignettes: 0, couleurTexte: '',
       couleur: p.modeles[0].couleurs.length === 1 && !p.epuises.includes(p.modeles[0].couleurs[0].nom) ? p.modeles[0].couleurs[0].nom : '',
       taille: p.tailles.length === 1 && !p.epuises.includes(p.tailles[0]) ? p.tailles[0] : '', guide: false });
     rendreArticle(); montrer('article');
@@ -409,6 +418,7 @@
   }
 
   function rendreArticle() {
+    const yAvant = window.scrollY;
     const p = produits[etat.sel]; const m = p.modeles[etat.modele];
     const img = photoActuelle(p);
     const choisie = m.couleurs.find((x) => x.nom === etat.couleur);
@@ -436,7 +446,14 @@
         p.choix.map((c) => '<div class="bloc"><h2>' + esc(c.label) + ' : <span>' + esc(etat.choix[c.label] || 'à choisir') + '</span></h2><div class="options">' +
           c.valeurs.map((v) => '<button type="button" class="choix carre' + (etat.choix[c.label] === v ? ' on' : '') + '" data-choix="' + esc(c.label) + '" data-valeur="' + esc(v) + '">' + esc(v) + '</button>').join('') + '</div></div>').join('') +
         '<div class="bloc"><h2>Couleur : <span>' + esc(couleurChoisie || (m.couleurs.length ? 'à choisir' : 'précisez')) + '</span></h2>' +
-          (m.couleurs.length ? '<div class="options">' + puces(m.couleurs.map((c) => c.nom), etat.couleur, 'data-couleur') + '</div>'
+          (m.couleurs.length ? (m.couleurs.some((c) => c.photo)
+            ? '<div class="vignettes" id="vignettes">' + m.couleurs.map((c) => {
+                const ep = p.epuises.includes(c.nom);
+                return '<button type="button" class="vignette-couleur' + (c.nom === etat.couleur ? ' on' : '') + (ep ? ' epuise' : '') + '"' + (ep ? ' disabled' : ' data-couleur="' + esc(c.nom) + '"') + ' aria-label="' + esc(c.nom) + (ep ? ' épuisé' : '') + '">' +
+                  (c.photo ? '<img src="' + esc(c.photo) + '" alt="" loading="lazy">' : '<span class="sans-photo">Photo<br>à venir</span>') +
+                  '<span class="nom-couleur">' + esc(c.nom) + '</span></button>';
+              }).join('') + '</div>'
+            : '<div class="options">' + puces(m.couleurs.map((c) => c.nom), etat.couleur, 'data-couleur') + '</div>')
             : '<input class="champ" id="couleur-texte" placeholder="Couleur souhaitée (' + esc(p.couleurLibre || '') + ')" value="' + esc(etat.couleurTexte) + '">') + '</div>' +
         '<div class="bloc"><h2>Taille : <span>' + esc(p.tailles.length ? (etat.taille || 'à choisir') : 'à confirmer au stand') + '</span></h2>' +
           (p.tailles.length > 1 ? '<div class="options">' + puces(p.tailles, etat.taille, 'data-taille', true) + '</div>' : '') +
@@ -452,6 +469,13 @@
           (p.epuiseTout ? '<button type="button" class="btn" disabled style="background:#A8A29A;cursor:not-allowed">Épuisé</button>'
             : '<button type="button" class="btn" id="ajouter">Ajouter ' + etat.qte + sousTotal + '</button>') +
         '</div></div>';
+    const v = $('vignettes');
+    if (v) {
+      if (etat.defilVignettes != null) v.scrollLeft = etat.defilVignettes;
+      const on = v.querySelector('.on');
+      if (on && (on.offsetLeft < v.scrollLeft || on.offsetLeft + on.offsetWidth > v.scrollLeft + v.clientWidth)) v.scrollLeft = on.offsetLeft - 20;
+    }
+    if (Math.abs(window.scrollY - yAvant) > 2) window.scrollTo(0, yAvant);
   }
 
   function ajouter() {
@@ -763,7 +787,7 @@
       if (cs.length === 1 && !p.epuises.includes(cs[0].nom)) etat.couleur = cs[0].nom; else if (!cs.some((c) => c.nom === etat.couleur)) etat.couleur = '';
     }
     if (b.dataset.choix != null) etat.choix[b.dataset.choix] = b.dataset.valeur;
-    if (b.dataset.couleur != null) etat.couleur = b.dataset.couleur;
+    if (b.dataset.couleur != null) { etat.couleur = b.dataset.couleur; etat.defilVignettes = ($('vignettes') || {}).scrollLeft || 0; }
     if (b.dataset.taille != null) etat.taille = b.dataset.taille;
     if (b.dataset.qte != null) etat.qte = Math.max(1, Math.min(10, etat.qte + +b.dataset.qte));
     rendreArticle();
