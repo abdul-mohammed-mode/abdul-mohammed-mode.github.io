@@ -170,7 +170,15 @@
   .onglets { display: flex; gap: 6px; padding: 10px 16px; border-bottom: 1px solid #E6E1D9; }
   .onglet { flex: 1; height: 38px; border-radius: 10px; border: 1px solid var(--bord); background: #FFFFFF; font-weight: 700; font-size: 14px; cursor: pointer; }
   .onglet.on { background: var(--vert); border-color: var(--vert); color: #FFFFFF; }
-  #schema { flex: 1; min-height: 0; overflow: auto; background: #F7F5F1; display: flex; justify-content: center; align-items: flex-start; padding: 8px 6px 24px; }
+  #schema { flex: 1; min-height: 0; overflow: hidden; background: #F7F5F1; display: flex; justify-content: center; align-items: center; padding: 6px; }
+  #schema svg { width: 100%; height: 100%; display: block; }
+  @media (max-height: 760px) {
+    .plan .infos-plan { padding-top: 10px; gap: 8px; }
+    .plan .infos-plan p { font-size: 13px; }
+    #plan-adresse, #plan-adresse + br, #plan-jours { display: none; }
+    .plan .onglets { padding: 8px 16px; }
+    .plan .haut { padding-bottom: 8px; }
+  }
   #schema svg { display: block; }
   #schema .case { cursor: default; }
   .edition #schema .case { cursor: pointer; }
@@ -585,7 +593,7 @@
     $('schema').style.display = o === 'schema' ? 'flex' : 'none';
     $('carte').style.display = o === 'carte' ? 'block' : 'none';
     if (o === 'carte') initCarte();
-    else { const st = $('schema').querySelector('.stand'); if (st) setTimeout(() => st.scrollIntoView({ block: 'center', inline: 'center' }), 30); }
+
   }
   document.addEventListener('click', (e) => { const b = e.target.closest('[data-onglet]'); if (b) montrerOnglet(b.dataset.onglet); });
 
@@ -596,8 +604,8 @@
   try { if (EDITION) { const s2 = JSON.parse(localStorage.getItem('stand-edition') || 'null'); if (Array.isArray(s2)) casesStand = s2; } } catch (e) {}
   function dessinerSchema() {
     const cfg = BOUTIQUE.planMarche || { parties: [{ nom: 'Partie 1', cases: 14 }, { nom: 'Partie 2', cases: 14 }] };
-    // échelle : 5 px = 1 m ; un emplacement = 4 m (le long de l'allée) × 3 m
-    const PX = 5, CW = 3 * PX, CH = 4 * PX, AL = (cfg.largeurAllee || 6) * PX, AP = (cfg.largeurAlleePrincipale || 10) * PX, RUE = 30, SIDE = 64, RS = 26, TOP = 52, BOT = 58;
+    // plan simplifié : pas à l'échelle, tout tient dans l'écran
+    const CW = 18, CH = 18, AL = 18, AP = 30, RUE = 26, SIDE = 64, RS = 24, TOP = 62, BOT = 50;
     const cols = [['c', 1], ['a', 1], ['c', 2], ['c', 3], ['p', 2], ['c', 4], ['c', 5], ['a', 3], ['c', 6]];
     const largeur = cols.reduce((w, [t]) => w + (t === 'c' ? CW : t === 'p' ? AP : AL), 0);
     const X0 = SIDE + RS + 8;
@@ -629,7 +637,7 @@
       if (pi < cfg.parties.length - 1) {
         out.push('<rect x="' + (SIDE) + '" y="' + (y + 8) + '" width="' + (W - 2 * SIDE) + '" height="' + RUE + '" fill="#CFC9C0"/>');
         out.push(txt(W / 2, y + 8 + RUE / 2, cfg.entreLesParties || '', 'text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="#FFFFFF"'));
-        y += RUE + 30;
+        y += RUE + 26;
       }
     });
     const finMarche = y;
@@ -683,7 +691,7 @@
       if (x2 === 'x2') { fond.push(feu(fx - 7, fy)); fond.push(feu(fx + 7, fy)); } else fond.push(feu(fx, fy));
     });
     fond.push(txt(W - 8, 10, 'N ↑', 'text-anchor="end" font-size="10" font-weight="700" fill="#8A847C"'));
-    $('schema').innerHTML = '<svg width="100%" style="max-width:' + Math.round(W * 1.15) + 'px" viewBox="0 0 ' + W + ' ' + Ht + '" role="img" aria-label="Plan du marché">' + fond.join('') + out.join('') + dessus.join('') + '</svg>';
+    $('schema').innerHTML = '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" viewBox="0 0 ' + W + ' ' + Ht + '" role="img" aria-label="Plan du marché">' + fond.join('') + out.join('') + dessus.join('') + '</svg>';
     const first = casesStand[0];
     if (first) {
       const r = $('schema').querySelector('[data-case="' + first + '"]');

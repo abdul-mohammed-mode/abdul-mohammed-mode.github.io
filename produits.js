@@ -28,17 +28,13 @@ const BOUTIQUE = {
   // (pour la changer : appui long sur Google Maps à l'endroit du stand, puis copier les 2 nombres)
   positionStand: [48.99835, 1.68418],
   // Plan du marché vu du dessus : 2 parties, 3 allées chacune (celle du milieu = principale)
-  // Mesures prises sur la carte (OpenStreetMap) :
-  //   partie nord ≈ 136 m × 40 m  → 136 ÷ 4 m = 34 emplacements par rangée
-  //   partie sud  ≈ 103 m × 41 m  → 103 ÷ 4 m = 25 emplacements par rangée
-  //   largeur : 6 rangées × 3 m = 18 m de stands + allées (≈ 6 m, 10 m pour la principale, 6 m)
+  // Plan simplifié (pas à l'échelle) pour tenir sur un écran sans défiler.
+  // En vrai : partie nord ≈ 34 emplacements par rangée, partie sud ≈ 25.
   planMarche: {
     parties: [
-      { nom: 'Partie nord', cases: 34 },
-      { nom: 'Partie sud', cases: 25 }
+      { nom: 'Partie nord', cases: 14 },
+      { nom: 'Partie sud', cases: 10 }
     ],
-    largeurAllee: 6,
-    largeurAlleePrincipale: 10,
     entreLesParties: 'Rue Boileau',
     coteGauche: 'Rue Denis Diderot',
     coteDroit: 'Rue Jean Racine',
@@ -60,7 +56,7 @@ const BOUTIQUE = {
   },
   // Emplacement(s) du stand sur ce plan (cliquer sur le plan en mode modification
   // — adresse du site suivie de ?modifier — puis recopier le code affiché ici)
-  standCases: ['1-1-9', '1-1-10', '1-1-11'],
+  standCases: ['1-1-4', '1-1-5', '1-1-6'],
   // Repère pour trouver le stand (laisser '' si rien à dire)
   repereStand: 'Partie nord, 1re rangée côté rue Denis Diderot, 9e emplacement en venant de la rue La Fontaine (le double feu derrière vous).',
   // Créneaux proposés pour l'heure de passage
