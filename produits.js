@@ -56,7 +56,7 @@ const BOUTIQUE = {
   },
   // Emplacement(s) du stand sur ce plan (cliquer sur le plan en mode modification
   // — adresse du site suivie de ?modifier — puis recopier le code affiché ici)
-  standCases: ['1-1-2', '1-1-3', '1-1-4'],
+  standCases: ['1-1-2', '1-1-3'],
   // Repère pour trouver le stand (laisser '' si rien à dire)
   repereStand: 'Partie nord, 1re rangée côté rue Denis Diderot, 9e emplacement en venant de la rue La Fontaine (le double feu derrière vous).',
   // Créneaux proposés pour l'heure de passage
