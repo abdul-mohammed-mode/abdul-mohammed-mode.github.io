@@ -99,10 +99,11 @@ const PRODUITS = [
     tailles: M_A_XXXL,
     modeles: {
       'Broderie dorée': {
-        'Noir': 'vel-noir.jpg', 'Bordeaux': 'vel-bordeaux.jpg', 'Fuchsia': 'vel-fuchsia.jpg',
-        'Vert sapin': 'vel-vertsapin.jpg', 'Bleu roi': 'vel-bleuroi.jpg', 'Bleu marine': 'vel-marine.jpg',
-        'Moutarde': 'vel-moutarde.jpg', 'Vert d’eau': 'vel-vertsauge.jpg', 'Mauve': 'vel-prune.jpg',
-        'Turquoise': null, 'Bleu canard': null, 'Prune': null, 'Taupe': null, 'Kaki': null
+        'Noir': 'vel-noir.jpg', 'Taupe': 'vel-taupe.jpg', 'Moutarde': 'vel-moutarde.jpg',
+        'Kaki': 'vel-kaki.jpg', 'Vert sapin': 'vel-vertsapin.jpg', 'Vert d’eau': 'vel-vertsauge.jpg',
+        'Bleu canard': 'vel-bleucanard.jpg', 'Bleu roi': 'vel-bleuroi.jpg', 'Bleu marine': 'vel-marine.jpg',
+        'Mauve': 'vel-prune.jpg', 'Prune': 'vel-prunefonce.jpg', 'Bordeaux': 'vel-bordeaux.jpg',
+        'Fuchsia': 'vel-fuchsia.jpg'
       },
       'Strass au col V': {
         'Beige': 'str-beige.jpg', 'Vieux rose': 'str-vieuxrose.jpg',
@@ -285,7 +286,7 @@ const PRODUITS = [
     categorie: 'Nuit', code: 'NU-02', nom: 'Nuisette à pois', prix: 4, offre3pour10: true,
     description: 'Nuisette à fines bretelles, imprimé petits pois et nœud au décolleté.',
     tailles: M_A_XXXL,
-    couleurs: { 'Gris': 'np-gris.jpg', 'Blanc': null }
+    couleurs: { 'Gris': 'np-gris.jpg', 'Blanc': 'np-blanc.jpg' }
   },
   {
     categorie: 'Nuit', code: 'CN-01', nom: 'Chemise de nuit fleurie', prix: 5,
