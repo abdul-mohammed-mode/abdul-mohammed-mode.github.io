@@ -269,9 +269,9 @@
   <div id="schema"></div>
   <div id="carte" style="display:none"></div>
   <div class="infos-plan">
-    <p><b id="plan-lieu"></b><br><span id="plan-adresse"></span><br><span id="plan-jours"></span></p>
     <p id="plan-repere"></p>
-    <a class="btn" id="plan-itineraire" target="_blank" rel="noopener">Itinéraire jusqu’au stand</a>
+    <a class="btn petit" id="plan-itineraire" target="_blank" rel="noopener">Itinéraire jusqu’au stand</a>
+    <p hidden><b id="plan-lieu"></b><span id="plan-adresse"></span><span id="plan-jours"></span></p>
   </div>
 </div>
 
@@ -605,7 +605,7 @@
   function dessinerSchema() {
     const cfg = BOUTIQUE.planMarche || { parties: [{ nom: 'Partie 1', cases: 14 }, { nom: 'Partie 2', cases: 14 }] };
     // plan simplifié : pas à l'échelle, tout tient dans l'écran
-    const CW = 18, CH = 18, AL = 18, AP = 30, RUE = 26, SIDE = 64, RS = 24, TOP = 62, BOT = 50;
+    const CW = 22, CH = 24, AL = 20, AP = 34, RUE = 26, SIDE = 70, RS = 22, TOP = 62, BOT = 48;
     const cols = [['c', 1], ['a', 1], ['c', 2], ['c', 3], ['p', 2], ['c', 4], ['c', 5], ['a', 3], ['c', 6]];
     const largeur = cols.reduce((w, [t]) => w + (t === 'c' ? CW : t === 'p' ? AP : AL), 0);
     const X0 = SIDE + RS + 8;
@@ -651,9 +651,9 @@
     fond.push(rue(0, Ht - 36, W, 28));
     fond.push(txt(W / 2, 26, cfg.enHaut || '', 'text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="#FFFFFF"'));
     fond.push(txt(W / 2, Ht - 22, cfg.enBas || '', 'text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="#FFFFFF"'));
-    const mg = (debutMarche + finMarche) / 2;
+    const mg = debutMarche + (cfg.parties[0].cases * CH) / 2;
     fond.push(txt(SIDE + RS / 2, mg, cfg.coteGauche || '', 'text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="#FFFFFF" transform="rotate(-90 ' + (SIDE + RS / 2) + ' ' + mg + ')"'));
-    fond.push(txt(W - SIDE - RS / 2, (debutMarche + finMarche) / 2 - 60, cfg.coteDroit || '', 'text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="#FFFFFF" transform="rotate(90 ' + (W - SIDE - RS / 2) + ' ' + ((debutMarche + finMarche) / 2 - 60) + ')"'));
+    fond.push(txt(W - SIDE - RS / 2, mg, cfg.coteDroit || '', 'text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="#FFFFFF" transform="rotate(90 ' + (W - SIDE - RS / 2) + ' ' + mg + ')"'));
     // repères
     const couleurs = { mairie: ['#DCE7F5', '#2F5E9E'], ecole: ['#FDEBC8', '#A0660A'], gymnase: ['#DDEFE6', '#1F7A4D'], sport: ['#E5F1E9', '#3B8A5E'], jeux: ['#F6E3EF', '#9C3F78'], autre: ['#ECE8E1', '#5E5A55'] };
     const icone = (type, cx, cy, col) => {
@@ -666,19 +666,19 @@
     const zoneH = finMarche - debutMarche + 20;
     (cfg.reperes || []).forEach((rp) => {
       const [bg, fg] = couleurs[rp.type] || couleurs.autre;
-      const y1 = debutMarche - 10 + rp.de * zoneH, y2 = debutMarche - 10 + rp.a * zoneH, h = Math.max(46, y2 - y1);
+      const y1 = debutMarche - 10 + rp.de * zoneH, y2 = debutMarche - 10 + rp.a * zoneH, h = Math.max(58, y2 - y1);
       const x = rp.cote === 'gauche' ? 4 : W - SIDE + 4, w = SIDE - 8, cx = x + w / 2;
       fond.push('<rect x="' + x + '" y="' + y1 + '" width="' + w + '" height="' + h + '" rx="7" fill="' + bg + '" stroke="' + fg + '" stroke-opacity="0.35"/>');
       fond.push(icone(rp.type, cx, y1 + 14, fg));
       const mots = rp.nom.split(' ');
       const lignes = []; let l = '';
-      mots.forEach((m) => { if ((l + ' ' + m).trim().length > 10) { if (l) lignes.push(l); l = m; } else l = (l + ' ' + m).trim(); });
+      mots.forEach((m) => { if ((l + ' ' + m).trim().length > 9) { if (l) lignes.push(l); l = m; } else l = (l + ' ' + m).trim(); });
       if (l) lignes.push(l);
-      lignes.forEach((t, i) => fond.push(txt(cx, y1 + 32 + i * 11, t, 'text-anchor="middle" font-size="9.5" font-weight="700" fill="' + fg + '"')));
+      lignes.forEach((t, i) => fond.push(txt(cx, y1 + 34 + i * 13, t, 'text-anchor="middle" font-size="11" font-weight="700" fill="' + fg + '"')));
       if (rp.detail) {
-        const dy = y1 + 32 + lignes.length * 11 + 2;
+        const dy = y1 + 34 + lignes.length * 13 + 2;
         const dd = rp.detail.split('\n');
-        dd.forEach((t, i) => fond.push(txt(cx, dy + i * 10, t, 'text-anchor="middle" font-size="8.5" fill="' + fg + '"')));
+        dd.forEach((t, i) => fond.push(txt(cx, dy + i * 11, t, 'text-anchor="middle" font-size="9.5" fill="' + fg + '"')));
       }
     });
     // feux tricolores

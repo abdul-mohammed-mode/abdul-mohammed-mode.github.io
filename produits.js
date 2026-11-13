@@ -32,8 +32,8 @@ const BOUTIQUE = {
   // En vrai : partie nord ≈ 34 emplacements par rangée, partie sud ≈ 25.
   planMarche: {
     parties: [
-      { nom: 'Partie nord', cases: 14 },
-      { nom: 'Partie sud', cases: 10 }
+      { nom: 'Partie nord', cases: 8 },
+      { nom: 'Partie sud', cases: 6 }
     ],
     entreLesParties: 'Rue Boileau',
     coteGauche: 'Rue Denis Diderot',
@@ -56,7 +56,7 @@ const BOUTIQUE = {
   },
   // Emplacement(s) du stand sur ce plan (cliquer sur le plan en mode modification
   // — adresse du site suivie de ?modifier — puis recopier le code affiché ici)
-  standCases: ['1-1-4', '1-1-5', '1-1-6'],
+  standCases: ['1-1-2', '1-1-3', '1-1-4'],
   // Repère pour trouver le stand (laisser '' si rien à dire)
   repereStand: 'Partie nord, 1re rangée côté rue Denis Diderot, 9e emplacement en venant de la rue La Fontaine (le double feu derrière vous).',
   // Créneaux proposés pour l'heure de passage
