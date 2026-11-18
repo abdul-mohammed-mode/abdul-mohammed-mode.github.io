@@ -95,9 +95,9 @@ const PRODUITS = [
     tailles: M_A_XXXL,
     modeles: {
       'Broderie dorée': {
-        'Noir': 'vel-noir.jpg', 'Taupe': 'vel-taupe.jpg', 'Moutarde': 'vel-moutarde.jpg',
+        'Noir': 'vel-noir.jpg', 'Gris argenté': 'vel-grisargent.jpg', 'Taupe': 'vel-taupe.jpg', 'Moutarde': 'vel-moutarde.jpg',
         'Kaki': 'vel-kaki.jpg', 'Vert sapin': 'vel-vertsapin.jpg', 'Vert d’eau': 'vel-vertsauge.jpg',
-        'Bleu canard': 'vel-bleucanard.jpg', 'Bleu roi': 'vel-bleuroi.jpg', 'Bleu marine': 'vel-marine.jpg',
+        'Turquoise': 'vel-turquoise.jpg', 'Bleu canard': 'vel-bleucanard.jpg', 'Bleu roi': 'vel-bleuroi.jpg', 'Bleu marine': 'vel-marine.jpg',
         'Mauve': 'vel-prune.jpg', 'Prune': 'vel-prunefonce.jpg', 'Bordeaux': 'vel-bordeaux.jpg',
         'Fuchsia': 'vel-fuchsia.jpg'
       },
