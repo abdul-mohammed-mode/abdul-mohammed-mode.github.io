@@ -233,11 +233,11 @@ const PRODUITS = [
   // ---------------- BASIQUES (3 pour 10 €) ----------------
   {
     categorie: 'Basiques', code: 'TS-01', nom: 'T-shirt moulant manches longues', prix: 4, offre3pour10: true,
-    description: 'Col rond, matière légère et fluide. Idéal sous une robe, un gilet ou une abaya. Existe en taille normale et en grande taille (coupe plus large, pour les tailles fortes).',
+    description: 'Col rond, matière légère et fluide. Idéal sous une robe, un gilet ou une abaya. Existe en version classique et en version courte : s’arrête à la taille, façon crop top, sans être trop court.',
     tailles: TU,
     modeles: {
-      'Taille normale': { 'Blanc': 'ts-blanc.jpg', 'Noir': 'ts-noir.jpg', 'Gris': 'ts-gris.jpg', 'Taupe': 'ts-taupe.jpg' },
-      'Grande taille': { 'Noir': 'tsgt-noir.jpg', 'Gris': 'tsgt-gris.jpg', 'Blanc': 'tsgt-blanc.jpg', 'Beige': 'tsgt-beige.jpg' }
+      'Classique': { 'Blanc': 'ts-blanc.jpg', 'Noir': 'ts-noir.jpg', 'Gris': 'ts-gris.jpg', 'Taupe': 'ts-taupe.jpg' },
+      'Court': { 'Noir': 'tsc-noir.jpg', 'Gris': 'tsc-gris.jpg', 'Blanc': 'tsc-blanc.jpg', 'Beige': 'tsc-beige.jpg' }
     }
   },
   {
