@@ -93,6 +93,13 @@
   .qte.petit button { width: 32px; height: 32px; font-size: 17px; }
   .qte.petit span { min-width: 22px; font-size: 14px; }
   .note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--sable); font-size: 13px; line-height: 1.45; color: #3D3A36; }
+  .apercu { position: fixed; top: 0; left: 50%; width: 100%; max-width: 480px; padding: calc(8px + env(safe-area-inset-top)) 16px 8px; border: 0; border-bottom: 1px solid #E6E1D9; background: rgba(255,255,255,0.97); box-shadow: 0 4px 14px rgba(0,0,0,0.10); z-index: 7; cursor: pointer; display: flex; align-items: center; gap: 14px; text-align: left; opacity: 0; transform: translate(-50%, -100%); pointer-events: none; transition: opacity .18s ease, transform .18s ease; font: inherit; color: inherit; }
+  .apercu.visible { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .apercu img { width: 96px; height: 128px; flex: 0 0 96px; border-radius: 10px; object-fit: cover; object-position: center 30%; background: #E9E7E4; display: block; }
+  .apercu .txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .apercu b { font-size: 15px; line-height: 1.2; }
+  .apercu small { font-size: 13px; color: var(--gris); }
+  .apercu em { font-style: normal; font-size: 12px; color: var(--vert); font-weight: 700; }
   .bas { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; border-top: 1px solid #E6E1D9; padding: 12px 20px calc(16px + env(safe-area-inset-bottom)); background: #FFFFFF; display: flex; flex-direction: column; gap: 8px; z-index: 5; }
   .erreur { margin: 0; font-size: 13px; color: var(--rouge); }
   .vignettes { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; margin: 0 -20px; padding-left: 20px; padding-right: 20px; scroll-snap-type: x proximity; scrollbar-width: thin; }
@@ -448,6 +455,7 @@
         '<button type="button" class="retour" data-retour aria-label="Retour au catalogue">' + ICONE_RETOUR + '</button>' +
         (p.code ? '<span class="badge-code">' + esc(p.code) + '</span>' : '') +
       '</div>' +
+      (img ? '<button type="button" class="apercu" id="apercu" aria-label="Voir la photo en grand"><img src="' + esc(img) + '" alt=""><span class="txt"><b>' + esc(p.nom) + '</b><small>' + esc([p.modeles.length > 1 ? m.nom : '', couleurChoisie].filter(Boolean).join(' · ') || 'Choisissez une couleur') + '</small><em>Voir en grand</em></span></button>' : '') +
       (img ? '<p class="mention-photo">' + (sansPhoto ? '<b>Pas encore de photo pour le coloris « ' + esc(etat.couleur) + ' ».</b> ' : '') + esc(BOUTIQUE.mentionPhoto) + '</p>' : '') +
       '<div class="fiche">' +
         '<div><h1>' + esc(p.nom) + '</h1><p class="prix-grand">' + p.prix + ' € ' + (p.offre3pour10 ? '<span class="offre">3 pour 10 € (à mélanger)</span>' : '') + '</p>' +
@@ -487,7 +495,17 @@
       if (on && (on.offsetLeft < v.scrollLeft || on.offsetLeft + on.offsetWidth > v.scrollLeft + v.clientWidth)) v.scrollLeft = on.offsetLeft - 20;
     }
     if (Math.abs(window.scrollY - yAvant) > 2) window.scrollTo(0, yAvant);
+    majApercu();
   }
+
+  // Petite photo qui reste visible quand on descend pour choisir modèle / couleur
+  function majApercu() {
+    const a = $('apercu'); if (!a) return;
+    const h = document.querySelector('#ecran-article .hero');
+    const actif = $('ecran-article').classList.contains('actif');
+    a.classList.toggle('visible', !!(actif && h && h.getBoundingClientRect().bottom < 40));
+  }
+  window.addEventListener('scroll', majApercu, { passive: true });
 
   function ajouter() {
     const p = produits[etat.sel]; const m = p.modeles[etat.modele];
@@ -787,7 +805,7 @@
     const b = e.target.closest('button'); if (!b) return;
     const p = produits[etat.sel];
     if (b.hasAttribute('data-retour')) return history.back();
-    if (b.id === 'ouvrir-zoom') return ouvrirZoom();
+    if (b.id === 'ouvrir-zoom' || b.id === 'apercu') return ouvrirZoom();
     if (b.id === 'ajouter') return ajouter();
     if (b.id === 'aller-panier') return allerPanier();
     if (b.id === 'guide') { etat.guide = !etat.guide; return rendreArticle(); }
