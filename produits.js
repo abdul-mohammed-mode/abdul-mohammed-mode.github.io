@@ -177,16 +177,6 @@ const PRODUITS = [
     }
   },
   {
-    categorie: 'Manteaux & mailles', nom: 'Gilet long en maille', prix: 10,
-    description: 'Gilet long et ouvert en maille douce, avec poches.',
-    tailles: TU, couleurLibre: 'Plusieurs couleurs'
-  },
-  {
-    categorie: 'Manteaux & mailles', nom: 'Gilet rayé boutonné', prix: 10,
-    description: 'Gilet en maille douce à rayures, col V boutonné et poches.',
-    tailles: TU, couleurLibre: 'Plusieurs couleurs'
-  },
-  {
     categorie: 'Manteaux & mailles', code: 'PU-01', nom: 'Pull torsadé col roulé', prix: 5,
     description: 'Pull col roulé en maille torsadée, doux et bien chaud.',
     tailles: ['M/L', 'L/XL', 'XL/XXL'],
