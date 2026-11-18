@@ -240,7 +240,7 @@ const PRODUITS = [
     tailles: TU,
     modeles: {
       'Taille normale': { 'Blanc': 'ts-blanc.jpg', 'Noir': 'ts-noir.jpg', 'Gris': 'ts-gris.jpg', 'Taupe': 'ts-taupe.jpg' },
-      'Grande taille': { 'Noir': 'tsgt-noir.jpg' }
+      'Grande taille': { 'Noir': 'tsgt-noir.jpg', 'Gris': 'tsgt-gris.jpg', 'Blanc': 'tsgt-blanc.jpg', 'Beige': 'tsgt-beige.jpg' }
     }
   },
   {
