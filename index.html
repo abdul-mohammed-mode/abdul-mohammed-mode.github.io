@@ -426,6 +426,7 @@
       taille: p.tailles.length === 1 && !p.epuises.includes(p.tailles[0]) ? p.tailles[0] : '', guide: false });
     rendreArticle(); montrer('article');
     history.pushState({ e: 'article' }, '');
+    stat('/article/' + cleStat(p), p.nom);
   }
 
   function photoActuelle(p) {
@@ -850,6 +851,31 @@
     if ($('zoom').classList.contains('actif')) return fermerZoom();
     rendreCatalogue(); montrer('catalogue');
   });
+
+  // ---------- compteur de visites (GoatCounter) ----------
+  // Compte : l'ouverture du site, chaque article regardé, chaque ajout à la réservation
+  // et chaque réservation envoyée sur WhatsApp. Aucune donnée personnelle n'est envoyée.
+  const fileStats = [];
+  function stat(path, title, event) {
+    if (!BOUTIQUE.statsGoatCounter) return;
+    const o = { path: path, title: title || path, event: !!event };
+    if (window.goatcounter && window.goatcounter.count) window.goatcounter.count(o); else fileStats.push(o);
+  }
+  if (BOUTIQUE.statsGoatCounter) {
+    window.goatcounter = { no_onload: true };
+    const sc = document.createElement('script');
+    sc.async = true; sc.src = 'https://gc.zgo.at/count.js';
+    sc.setAttribute('data-goatcounter', 'https://' + BOUTIQUE.statsGoatCounter + '.goatcounter.com/count');
+    sc.onload = () => { while (fileStats.length) window.goatcounter.count(fileStats.shift()); };
+    document.head.appendChild(sc);
+  }
+  const cleStat = (p) => (p.code ? p.code + '-' : '') + p.nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  stat('/', 'Accueil');
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('#ajouter, #envoyer'); if (!b) return;
+    if (b.id === 'envoyer') stat('reservation-envoyee', 'Réservation envoyée sur WhatsApp', true);
+    else if (etat.sel != null) { const p = produits[etat.sel]; stat('ajout-' + cleStat(p), 'Ajout : ' + p.nom, true); }
+  }, true);
 
   rendreCatalogue();
   majWhatsApp('catalogue');

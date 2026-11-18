@@ -65,6 +65,9 @@ const BOUTIQUE = {
   nbJoursProposes: 6,
   // Règle affichée sur chaque fiche et à la confirmation
   regleReservation: 'Article gardé jusqu’à 17h le jour choisi. S’il n’est pas récupéré, il est remis en vente.',
+  // Compteur de visites GoatCounter (gratuit) : mettre ici le nom choisi à l'inscription
+  // (ex. 'abdulmode' pour abdulmode.goatcounter.com). Laisser '' pour désactiver.
+  statsGoatCounter: '',
   // Avertissement sous les photos
   mentionPhoto: 'Photo d’illustration : la couleur et les détails peuvent légèrement varier.'
 };
