@@ -91,19 +91,16 @@ const PRODUITS = [
   // ---------------- ROBES & ABAYAS ----------------
   {
     categorie: 'Robes & abayas', code: 'RO-01', nom: 'Robe en velours brodée', prix: 10,
-    description: 'Robe longue en velours doux, ornée d’une broderie au col. Élégante et chaude, parfaite pour les fêtes et les occasions. Choisissez d’abord le modèle (motif du tissu et de la broderie), puis la couleur.',
+    description: 'Robe longue en velours doux, ornée d’une broderie au col. Élégante et chaude, parfaite pour les fêtes et les occasions. Le motif du tissu et de la broderie varie selon le coloris : chaque photo montre le vrai modèle.',
     tailles: M_A_XXXL,
     modeles: {
-      'Broderie spirales': {
-        'Noir': 'vsp-noir.jpg', 'Kaki': 'vsp-kaki.jpg', 'Bleu canard': 'vsp-canard.jpg',
-        'Bleu marine': 'vsp-marine.jpg', 'Mauve': 'vsp-mauve.jpg', 'Bordeaux': 'vsp-bordeaux.jpg'
+      'Broderie dorée': {
+        'Noir': 'vsp-noir.jpg', 'Noir à tulipes': 'vtu-noir.jpg', 'Gris argenté': 'vbr-gris.jpg', 'Taupe': 'vbr-taupe.jpg',
+        'Moutarde': 'vro-moutarde.jpg', 'Kaki': 'vsp-kaki.jpg', 'Vert sapin': 'vco-vertsapin.jpg', 'Vert d’eau': 'vel-vertsauge.jpg',
+        'Turquoise': 'var-turquoise.jpg', 'Bleu canard': 'vsp-canard.jpg', 'Bleu roi': 'vta-bleuroi.jpg',
+        'Bleu marine': 'vsp-marine.jpg', 'Bleu marine côtelé': 'vco-marine.jpg', 'Bleu marine à roses': 'vro-marine.jpg',
+        'Mauve': 'vsp-mauve.jpg', 'Prune': 'vta-prune.jpg', 'Bordeaux': 'vsp-bordeaux.jpg', 'Framboise': 'vtu-framboise.jpg'
       },
-      'Motif tulipes': { 'Framboise': 'vtu-framboise.jpg', 'Noir': 'vtu-noir.jpg' },
-      'Velours brillant': { 'Taupe': 'vbr-taupe.jpg', 'Gris argenté': 'vbr-gris.jpg' },
-      'Côtelé perlé': { 'Vert sapin': 'vco-vertsapin.jpg', 'Bleu marine': 'vco-marine.jpg' },
-      'Motif tacheté': { 'Bleu roi': 'vta-bleuroi.jpg', 'Vert d’eau': 'vel-vertsauge.jpg', 'Prune': 'vta-prune.jpg' },
-      'Motif roses': { 'Moutarde': 'vro-moutarde.jpg', 'Bleu marine': 'vro-marine.jpg' },
-      'Broderie argentée': { 'Turquoise': 'var-turquoise.jpg' },
       'Strass au col V': {
         'Beige': 'str-beige.jpg', 'Vieux rose': 'str-vieuxrose.jpg',
         'Vert de gris': 'str-vertdegris.jpg', 'Noir': 'str-noir.jpg'
