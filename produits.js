@@ -101,9 +101,9 @@ const PRODUITS = [
       'Motif tulipes': { 'Framboise': 'vtu-framboise.jpg', 'Noir': 'vtu-noir.jpg' },
       'Velours brillant': { 'Taupe': 'vbr-taupe.jpg', 'Gris argenté': 'vbr-gris.jpg' },
       'Côtelé perlé': { 'Vert sapin': 'vco-vertsapin.jpg', 'Bleu marine': 'vco-marine.jpg' },
-      'Motif tacheté': { 'Bleu roi': 'vta-bleuroi.jpg', 'Vert d’eau': 'vel-vertsauge.jpg' },
+      'Motif tacheté': { 'Bleu roi': 'vta-bleuroi.jpg', 'Vert d’eau': 'vel-vertsauge.jpg', 'Prune': 'vta-prune.jpg' },
       'Motif roses': { 'Moutarde': 'vro-moutarde.jpg', 'Bleu marine': 'vro-marine.jpg' },
-      'Broderie argentée': { 'Turquoise': 'vel-turquoise.jpg' },
+      'Broderie argentée': { 'Turquoise': 'var-turquoise.jpg' },
       'Strass au col V': {
         'Beige': 'str-beige.jpg', 'Vieux rose': 'str-vieuxrose.jpg',
         'Vert de gris': 'str-vertdegris.jpg', 'Noir': 'str-noir.jpg'
