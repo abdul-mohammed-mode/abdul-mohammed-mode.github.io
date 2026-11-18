@@ -91,22 +91,25 @@ const PRODUITS = [
   // ---------------- ROBES & ABAYAS ----------------
   {
     categorie: 'Robes & abayas', code: 'RO-01', nom: 'Robe en velours brodée', prix: 10,
-    description: 'Robe longue en velours doux, ornée d’une broderie au col. Élégante et chaude, parfaite pour les fêtes et les occasions. Le motif de la broderie varie selon le coloris.',
+    description: 'Robe longue en velours doux, ornée d’une broderie au col. Élégante et chaude, parfaite pour les fêtes et les occasions. Choisissez d’abord le modèle (motif du tissu et de la broderie), puis la couleur.',
     tailles: M_A_XXXL,
     modeles: {
-      'Broderie dorée': {
-        'Noir': 'vel-noir.jpg', 'Gris argenté': 'vel-grisargent.jpg', 'Taupe': 'vel-taupe.jpg', 'Moutarde': 'vel-moutarde.jpg',
-        'Kaki': 'vel-kaki.jpg', 'Vert sapin': 'vel-vertsapin.jpg', 'Vert d’eau': 'vel-vertsauge.jpg',
-        'Turquoise': 'vel-turquoise.jpg', 'Bleu canard': 'vel-bleucanard.jpg', 'Bleu roi': 'vel-bleuroi.jpg', 'Bleu marine': 'vel-marine.jpg',
-        'Mauve': 'vel-prune.jpg', 'Prune': 'vel-prunefonce.jpg', 'Bordeaux': 'vel-bordeaux.jpg',
-        'Fuchsia': 'vel-fuchsia.jpg'
+      'Broderie spirales': {
+        'Noir': 'vsp-noir.jpg', 'Kaki': 'vsp-kaki.jpg', 'Bleu canard': 'vsp-canard.jpg',
+        'Bleu marine': 'vsp-marine.jpg', 'Mauve': 'vsp-mauve.jpg', 'Bordeaux': 'vsp-bordeaux.jpg'
       },
+      'Motif tulipes': { 'Framboise': 'vtu-framboise.jpg', 'Noir': 'vtu-noir.jpg' },
+      'Velours brillant': { 'Taupe': 'vbr-taupe.jpg', 'Gris argenté': 'vbr-gris.jpg' },
+      'Côtelé perlé': { 'Vert sapin': 'vco-vertsapin.jpg', 'Bleu marine': 'vco-marine.jpg' },
+      'Motif tacheté': { 'Bleu roi': 'vta-bleuroi.jpg', 'Vert d’eau': 'vel-vertsauge.jpg' },
+      'Motif roses': { 'Moutarde': 'vro-moutarde.jpg', 'Bleu marine': 'vro-marine.jpg' },
+      'Broderie argentée': { 'Turquoise': 'vel-turquoise.jpg' },
       'Strass au col V': {
         'Beige': 'str-beige.jpg', 'Vieux rose': 'str-vieuxrose.jpg',
         'Vert de gris': 'str-vertdegris.jpg', 'Noir': 'str-noir.jpg'
       }
     },
-    photoPrincipale: 'vel-marine.jpg'
+    photoPrincipale: 'vsp-noir.jpg'
   },
   {
     categorie: 'Robes & abayas', code: 'RO-02', nom: 'Robe sweat cocooning', prix: 10,
@@ -128,11 +131,10 @@ const PRODUITS = [
     }
   },
   {
-    categorie: 'Robes & abayas', code: 'RO-04', nom: 'Robe en maille à boutons', prix: 10,
-    description: 'Robe longue en maille côtelée chinée, patte boutonnée et manches longues.',
+    categorie: 'Robes & abayas', code: 'RO-04', nom: 'Robe en maille boutonnée', prix: 10,
+    description: 'Robe longue en maille côtelée douce et chaude, encolure ronde ornée de petits boutons décoratifs et pli creux sur le devant. Manches longues, coupe ample et confortable.',
     tailles: M_A_XXXL,
-    couleurs: { 'Gris clair': null, 'Anthracite': null, 'Vert': null, 'Camel': null, 'Bleu marine': null },
-    photoPrincipale: 'robe-maille.jpg'
+    couleurs: { 'Gris clair': 'rm-grisclair.jpg', 'Anthracite': 'rm-anthracite.jpg', 'Vert': 'rm-vert.jpg', 'Camel': 'rm-camel.jpg', 'Bleu marine': 'rm-marine.jpg' }
   },
   {
     categorie: 'Robes & abayas', code: 'RO-05', nom: 'Robe imprimée bleue', prix: 5,
@@ -206,14 +208,6 @@ const PRODUITS = [
     tailles: ['M/L', 'L/XL', 'XL/XXL'],
     couleurs: { 'Bleu marine': 'pb-marine.jpg', 'Kaki': 'pb-kaki.jpg', 'Beige': 'pb-beige.jpg', 'Noir': 'pb-noir.jpg' }
   },
-  {
-    categorie: 'Pantalons & jupes', code: 'JL-01', nom: 'Jupe longue côtelée', prix: 5,
-    description: 'Jupe longue et ample en velours côtelé, taille élastique.',
-    tailles: TU,
-    couleurs: { 'Beige': null, 'Noir': null, 'Violet': null, 'Orange': null, 'Rouge': null, 'Marron': null },
-    photoPrincipale: 'jupe-cotelee.jpg'
-  },
-
   // ---------------- CONFORT ----------------
   {
     categorie: 'Confort', code: 'ES-01', nom: 'Ensemble sweat uni 2 pièces', prix: 10,
@@ -242,9 +236,12 @@ const PRODUITS = [
   // ---------------- BASIQUES (3 pour 10 €) ----------------
   {
     categorie: 'Basiques', code: 'TS-01', nom: 'T-shirt moulant manches longues', prix: 4, offre3pour10: true,
-    description: 'Col rond, matière légère et fluide. Idéal sous une robe, un gilet ou une abaya.',
+    description: 'Col rond, matière légère et fluide. Idéal sous une robe, un gilet ou une abaya. Existe en taille normale et en grande taille (coupe plus large, pour les tailles fortes).',
     tailles: TU,
-    couleurs: { 'Blanc': 'ts-blanc.jpg', 'Noir': 'ts-noir.jpg', 'Gris': 'ts-gris.jpg', 'Taupe': 'ts-taupe.jpg' }
+    modeles: {
+      'Taille normale': { 'Blanc': 'ts-blanc.jpg', 'Noir': 'ts-noir.jpg', 'Gris': 'ts-gris.jpg', 'Taupe': 'ts-taupe.jpg' },
+      'Grande taille': { 'Noir': 'tsgt-noir.jpg' }
+    }
   },
   {
     categorie: 'Basiques', code: 'LE-01', nom: 'Legging', prix: 4, offre3pour10: true,

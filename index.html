@@ -319,9 +319,20 @@
   try { const s = JSON.parse(localStorage.getItem('panier-abdul') || 'null'); if (Array.isArray(s)) etat.panier = s; } catch (e) {}
   const sauver = () => { try { localStorage.setItem('panier-abdul', JSON.stringify(etat.panier)); } catch (e) {} };
 
+  // On retient la position dans le catalogue pour y revenir au retour d'un article
+  let yCatalogue = 0;
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   function montrer(ecran) {
+    const avant = document.querySelector('.ecran.actif');
+    if (avant && avant.id === 'ecran-catalogue' && ecran !== 'catalogue') yCatalogue = window.scrollY;
     document.querySelectorAll('.ecran').forEach((e) => e.classList.toggle('actif', e.id === 'ecran-' + ecran));
-    window.scrollTo(0, 0);
+    if (ecran === 'catalogue') {
+      const y = yCatalogue;
+      window.scrollTo(0, y);
+      requestAnimationFrame(() => window.scrollTo(0, y));
+    } else {
+      window.scrollTo(0, 0);
+    }
     majWhatsApp(ecran);
   }
   function majWhatsApp(ecran) {
@@ -810,7 +821,7 @@
 
   $('ecran-fini').addEventListener('click', (e) => {
     if (e.target.id === 'nouvelle') {
-      Object.assign(etat, { panier: [], code: '', jour: 0, creneau: '' }); sauver(); rendreCatalogue(); montrer('catalogue');
+      Object.assign(etat, { panier: [], code: '', jour: 0, creneau: '' }); sauver(); yCatalogue = 0; rendreCatalogue(); montrer('catalogue');
       history.replaceState(null, '');
     }
   });
