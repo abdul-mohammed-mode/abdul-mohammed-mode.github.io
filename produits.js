@@ -226,12 +226,15 @@ const PRODUITS = [
   // ---------------- BASIQUES (3 pour 10 €) ----------------
   {
     categorie: 'Basiques', code: 'TS-01', nom: 'T-shirt moulant manches longues', prix: 4, offre3pour10: true,
-    description: 'Col rond, matière légère et fluide. Idéal sous une robe, un gilet ou une abaya. Existe en version classique et en version courte : s’arrête à la taille, façon crop top, sans être trop court.',
+    description: 'Col rond, matière légère et fluide. Idéal sous une robe, un gilet ou une abaya.',
     tailles: TU,
-    modeles: {
-      'Classique': { 'Blanc': 'ts-blanc.jpg', 'Noir': 'ts-noir.jpg', 'Gris': 'ts-gris.jpg', 'Taupe': 'ts-taupe.jpg' },
-      'Court': { 'Noir': 'tsc-noir.jpg', 'Gris': 'tsc-gris.jpg', 'Blanc': 'tsc-blanc.jpg', 'Beige': 'tsc-beige.jpg' }
-    }
+    couleurs: { 'Blanc': 'ts-blanc.jpg', 'Noir': 'ts-noir.jpg', 'Gris': 'ts-gris.jpg', 'Taupe': 'ts-taupe.jpg' }
+  },
+  {
+    categorie: 'Basiques', code: 'TS-02', nom: 'Crop top manches longues', prix: 4, offre3pour10: true,
+    description: 'T-shirt court ajusté qui s’arrête à la taille, façon crop top sans être trop court. Col rond, matière légère et fluide. Parfait avec un pantalon ou une jupe taille haute.',
+    tailles: TU,
+    couleurs: { 'Noir': 'tsc-noir.jpg', 'Blanc': 'tsc-blanc.jpg', 'Gris': 'tsc-gris.jpg', 'Beige': 'tsc-beige.jpg' }
   },
   {
     categorie: 'Basiques', code: 'LE-01', nom: 'Legging', prix: 4, offre3pour10: true,
