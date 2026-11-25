@@ -95,7 +95,7 @@
   .qte button svg { display: block; margin: auto; }
   .qte.petit span { min-width: 22px; font-size: 14px; }
   .note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--sable); font-size: 13px; line-height: 1.45; color: #3D3A36; }
-  .apercu { position: fixed; top: 0; left: 50%; width: 100%; max-width: 480px; padding: calc(8px + env(safe-area-inset-top)) 16px 8px; border: 0; border-bottom: 1px solid #E6E1D9; background: rgba(255,255,255,0.97); box-shadow: 0 4px 14px rgba(0,0,0,0.10); z-index: 7; cursor: pointer; display: flex; align-items: center; gap: 14px; text-align: left; opacity: 0; transform: translate(-50%, -100%); pointer-events: none; transition: opacity .18s ease, transform .18s ease; font: inherit; color: inherit; }
+  .apercu { position: fixed; top: 0; left: 50%; width: 100%; max-width: 480px; padding: calc(8px + env(safe-area-inset-top)) 16px 8px; border: 0; border-bottom: 1px solid #E6E1D9; background: rgba(255,255,255,0.97); box-shadow: 0 4px 14px rgba(0,0,0,0.10); z-index: 7; cursor: pointer; display: flex; align-items: center; gap: 14px; text-align: left; opacity: 0; transform: translate(-50%, -100%); pointer-events: none; transition: opacity .22s var(--sortie-douce), transform .26s var(--sortie-douce); font: inherit; color: inherit; }
   .apercu.visible { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
   .apercu img { width: 96px; height: 128px; flex: 0 0 96px; border-radius: 10px; object-fit: cover; object-position: center 30%; background: #E9E7E4; display: block; }
   .apercu .txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
@@ -216,6 +216,20 @@
   .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 150px; width: calc(100% - 40px); max-width: 440px; padding: 12px 14px; border-radius: 12px; background: var(--texte); color: #FFFFFF; font-size: 14px; display: none; justify-content: space-between; align-items: center; gap: 10px; z-index: 10; }
   .toast.actif { display: flex; }
   .toast button { border: 0; background: none; color: #9FE0D6; font-weight: 700; cursor: pointer; }
+
+  /* Animations : entrées en ralentissant, sorties en accélérant, effet ressort pour l'interface, rien de linéaire */
+  :root { --sortie-douce: cubic-bezier(.22,1,.36,1); --ressort: cubic-bezier(.34,1.56,.64,1); }
+  @keyframes entree-ecran { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes entree-fondu { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes entree-toast { from { opacity: 0; transform: translate(-50%, 16px) scale(.96); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+  @keyframes rebond { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+  .ecran.actif { animation: entree-ecran .28s var(--sortie-douce) both; }
+  .zoom.actif, .plan.actif { animation: entree-fondu .22s var(--sortie-douce) both; }
+  .toast.actif { animation: entree-toast .38s var(--ressort) both; }
+  .rebond { animation: rebond .42s var(--ressort); }
+  .btn, .qte button, .vignette-couleur, .carte, .puce { transition: transform .32s var(--ressort), border-color .2s var(--sortie-douce), background-color .2s var(--sortie-douce); }
+  .btn:active, .qte button:active, .vignette-couleur:active, .carte:active { transform: scale(.96); transition-duration: .08s; transition-timing-function: cubic-bezier(.55,0,1,.45); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
@@ -331,6 +345,7 @@
   // On retient la position dans le catalogue pour y revenir au retour d'un article
   let yCatalogue = 0;
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  let nbAvant = null;
   function montrer(ecran) {
     const avant = document.querySelector('.ecran.actif');
     if (avant && avant.id === 'ecran-catalogue' && ecran !== 'catalogue') yCatalogue = window.scrollY;
@@ -418,6 +433,7 @@
     const t = totaux();
     $('resume-panier').textContent = t.nb ? t.nb + ' article' + (t.nb > 1 ? 's' : '') + ' · ' + t.total + ' €' : 'Aucun article réservé';
     $('voir-panier').textContent = t.nb ? 'Ma réservation (' + t.nb + ')' : 'Ma réservation';
+    const vp = $('voir-panier'); if (nbAvant !== null && t.nb > nbAvant) { vp.classList.remove('rebond'); void vp.offsetWidth; vp.classList.add('rebond'); } nbAvant = t.nb;
   }
 
   // ---------- 2. article ----------
