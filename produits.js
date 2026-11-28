@@ -18,7 +18,7 @@
 const BOUTIQUE = {
   nom: 'ABDUL Mohammed',
   whatsapp: '33750579824',            // numéro au format international, sans + ni espaces
-  urlStock: '',                       // adresse du script Google qui relie le tableau « Stock et commandes » (vide = sans gestion du stock)
+  urlStock: 'https://script.google.com/macros/s/AKfycbzf79hzsi_N6ZFszMvNhm_e0ReGvyYKOfr9-vvQS3SKMFJ_jZmbjudVYSE0jMm_OmylaA/exec',                       // adresse du script Google qui relie le tableau « Stock et commandes » (vide = sans gestion du stock)
   lieu: 'Marché de Mantes-la-Jolie',
   joursDeMarche: ['mardi', 'vendredi', 'dimanche'],
   horaires: '14h–17h',
