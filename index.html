@@ -93,6 +93,7 @@
   .qte span { min-width: 32px; text-align: center; font-weight: 700; font-size: 16px; }
   .qte.petit button { width: 32px; height: 32px; font-size: 17px; }
   .qte button svg { display: block; margin: auto; }
+  .reste-stock { margin: -4px 0 0; font-size: 13px; font-weight: 600; color: #B4540A; }
   .qte.petit span { min-width: 22px; font-size: 14px; }
   .note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--sable); font-size: 13px; line-height: 1.45; color: #3D3A36; }
   .apercu { position: fixed; top: 0; left: 50%; width: 100%; max-width: 480px; padding: calc(8px + env(safe-area-inset-top)) 16px 8px; border: 0; border-bottom: 1px solid #E6E1D9; background: rgba(255,255,255,0.97); box-shadow: 0 4px 14px rgba(0,0,0,0.10); z-index: 7; cursor: pointer; display: flex; align-items: center; gap: 14px; text-align: left; opacity: 0; transform: translate(-50%, -100%); pointer-events: none; transition: opacity .22s var(--sortie-douce), transform .26s var(--sortie-douce); font: inherit; color: inherit; }
@@ -413,6 +414,46 @@
     return { total: autre + totalLot, eco: lot * 4 - totalLot, nb: etat.panier.reduce((n, l) => n + l.qte, 0) };
   }
 
+  // ---------- stock en direct (tableau Google) ----------
+  let dispoStock = null;
+  const cleStock = (p, mi, couleur, taille) => [p.nom, p.modeles.length > 1 ? p.modeles[mi].nom : '', couleur, taille].join('|');
+  function resteStock(p, mi, couleur, taille) {
+    if (!dispoStock) return 99;
+    const k = cleStock(p, mi, couleur, taille);
+    if (!(k in dispoStock)) return 99;
+    return dispoStock[k] - etat.panier.filter((l) => l.stockCle === k).reduce((n, l) => n + l.qte, 0);
+  }
+  const taillesDe = (p) => (p.tailles.length ? p.tailles : ['']);
+  const couleurEpuisee = (p, mi, c) => p.epuises.includes(c) || taillesDe(p).every((t) => p.epuises.includes(t) || resteStock(p, mi, c, t) <= 0);
+  const tailleEpuisee = (p, mi, couleur, t) => p.epuises.includes(t) || (couleur
+    ? resteStock(p, mi, couleur, t) <= 0
+    : p.modeles[mi].couleurs.length > 0 && p.modeles[mi].couleurs.every((c) => resteStock(p, mi, c.nom, t) <= 0));
+  const modeleEpuise = (p, mi) => p.modeles[mi].couleurs.length > 0 && p.modeles[mi].couleurs.every((c) => couleurEpuisee(p, mi, c.nom));
+  const epuise = (p) => p.epuiseTout || (!!dispoStock && p.modeles.every((m, mi) => modeleEpuise(p, mi)));
+  function chargerStock() {
+    if (!BOUTIQUE.urlStock) return;
+    fetch(BOUTIQUE.urlStock).then((r) => r.json()).then((j) => {
+      if (!j || !j.dispo) return;
+      dispoStock = j.dispo;
+      const actif = (document.querySelector('.ecran.actif') || {}).id;
+      if (actif === 'ecran-catalogue') rendreCatalogue();
+      if (actif === 'ecran-article') rendreArticle();
+    }).catch(() => {});
+  }
+  function envoyerCommande() {
+    if (!BOUTIQUE.urlStock) return;
+    const jour = joursMarche()[etat.jour] || {}; const d = jour.d;
+    const corps = {
+      code: etat.code, nom: etat.nom.trim(), tel: etat.tel.trim(), creneau: etat.creneau || BOUTIQUE.horaires,
+      retrait: d ? d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() : '',
+      lignes: etat.panier.map((l) => {
+        const k = (l.stockCle || '').split('|');
+        return { article: l.nom, modele: k[1] || '', couleur: l.couleur, taille: l.taille, options: k[1] ? '' : (l.modele || ''), qte: l.qte, prix: l.prix };
+      })
+    };
+    try { fetch(BOUTIQUE.urlStock, { method: 'POST', mode: 'no-cors', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(corps) }); } catch (e) {}
+  }
+
   // ---------- 1. catalogue ----------
   function rendreCatalogue() {
     document.querySelectorAll('[data-nom]').forEach((e) => (e.textContent = BOUTIQUE.nom));
@@ -425,7 +466,7 @@
     $('grille').innerHTML = liste.length ? liste.map((p) =>
       '<button type="button" class="carte" data-id="' + p.id + '">' +
         (p.image ? '<img class="vignette" loading="lazy" src="' + esc(p.image) + '" alt="' + esc(p.nom) + '">' : '<span class="vide-photo">Photo à venir</span>') +
-        (p.epuiseTout ? '<span class="badge-epuise">Épuisé</span>' : '') +
+        (epuise(p) ? '<span class="badge-epuise">Épuisé</span>' : '') +
         '<span class="nom">' + esc(p.nom) + '</span>' +
         '<span class="prix">' + p.prix + ' € ' + (p.offre3pour10 ? '<span class="offre">3 pour 10 €</span>' : '') + '</span>' +
         '<span class="details">' + esc(p.resume) + '</span>' +
@@ -462,7 +503,7 @@
     const sansPhoto = !!(choisie && !choisie.photo);
     const couleurChoisie = m.couleurs.length ? etat.couleur : etat.couleurTexte.trim();
     const sousTotal = p.offre3pour10 ? '' : ' · ' + p.prix * etat.qte + ' €';
-    const puces = (liste, actif, attr, carre) => liste.map((v) => p.epuises.includes(v)
+    const puces = (liste, actif, attr, carre, estEp) => liste.map((v) => (estEp ? estEp(v) : p.epuises.includes(v))
       ? '<button type="button" class="choix epuise' + (carre ? ' carre' : '') + '" disabled aria-label="' + esc(v) + ' épuisé">' + esc(v) + '</button>'
       : '<button type="button" class="choix' + (carre ? ' carre' : '') + (v === actif ? ' on' : '') + '" ' + attr + '="' + esc(v) + '">' + esc(v) + '</button>').join('');
     const guide = p.tailles.filter((t) => GUIDE_TAILLES[t]);
@@ -479,24 +520,25 @@
       '<div class="fiche">' +
         '<div><h1>' + esc(p.nom) + '</h1><p class="prix-grand">' + p.prix + ' € ' + (p.offre3pour10 ? '<span class="offre">3 pour 10 € (à mélanger)</span>' : '') + '</p>' +
           (p.description ? '<p class="desc">' + esc(p.description) + '</p>' : '') +
-          (p.epuiseTout ? '<p class="erreur" style="margin-top:8px;font-weight:700">Épuisé pour le moment — revenez bientôt.</p>' : '') + '</div>' +
-        (p.modeles.length > 1 ? '<div class="bloc"><h2>Modèle : <span>' + esc(m.nom) + '</span></h2><div class="options">' + puces(p.modeles.map((x) => x.nom), m.nom, 'data-modele', true) + '</div></div>' : '') +
+          (epuise(p) ? '<p class="erreur" style="margin-top:8px;font-weight:700">Épuisé pour le moment — revenez bientôt.</p>' : '') + '</div>' +
+        (p.modeles.length > 1 ? '<div class="bloc"><h2>Modèle : <span>' + esc(m.nom) + '</span></h2><div class="options">' + puces(p.modeles.map((x) => x.nom), m.nom, 'data-modele', true, (v) => p.epuises.includes(v) || modeleEpuise(p, p.modeles.findIndex((x) => x.nom === v))) + '</div></div>' : '') +
         p.choix.map((c) => '<div class="bloc"><h2>' + esc(c.label) + ' : <span>' + esc(etat.choix[c.label] || 'à choisir') + '</span></h2><div class="options">' +
           c.valeurs.map((v) => '<button type="button" class="choix carre' + (etat.choix[c.label] === v ? ' on' : '') + '" data-choix="' + esc(c.label) + '" data-valeur="' + esc(v) + '">' + esc(v) + '</button>').join('') + '</div></div>').join('') +
         '<div class="bloc"><h2>Couleur : <span>' + esc(couleurChoisie || (m.couleurs.length ? 'à choisir' : 'précisez')) + '</span></h2>' +
           (m.couleurs.length ? (m.couleurs.some((c) => c.photo)
             ? '<div class="vignettes" id="vignettes">' + m.couleurs.map((c) => {
-                const ep = p.epuises.includes(c.nom);
+                const ep = couleurEpuisee(p, etat.modele, c.nom);
                 return '<button type="button" class="vignette-couleur' + (c.nom === etat.couleur ? ' on' : '') + (ep ? ' epuise' : '') + '"' + (ep ? ' disabled' : ' data-couleur="' + esc(c.nom) + '"') + ' aria-label="' + esc(c.nom) + (ep ? ' épuisé' : '') + '">' +
                   (c.photo ? '<img src="' + esc(c.photo) + '" alt="" loading="lazy">' : '<span class="sans-photo">Photo<br>à venir</span>') +
                   '<span class="nom-couleur">' + esc(c.nom) + '</span></button>';
               }).join('') + '</div>'
-            : '<div class="options">' + puces(m.couleurs.map((c) => c.nom), etat.couleur, 'data-couleur') + '</div>')
+            : '<div class="options">' + puces(m.couleurs.map((c) => c.nom), etat.couleur, 'data-couleur', false, (v) => couleurEpuisee(p, etat.modele, v)) + '</div>')
             : '<input class="champ" id="couleur-texte" placeholder="Couleur souhaitée (' + esc(p.couleurLibre || '') + ')" value="' + esc(etat.couleurTexte) + '">') + '</div>' +
         '<div class="bloc"><h2>Taille : <span>' + esc(p.tailles.length ? (etat.taille || 'à choisir') : 'à confirmer au stand') + '</span></h2>' +
-          (p.tailles.length > 1 ? '<div class="options">' + puces(p.tailles, etat.taille, 'data-taille', true) + '</div>' : '') +
+          (p.tailles.length > 1 ? '<div class="options">' + puces(p.tailles, etat.taille, 'data-taille', true, (v) => tailleEpuisee(p, etat.modele, couleurChoisie, v)) + '</div>' : '') +
           (guide.length ? '<button type="button" class="lien" id="guide">' + (etat.guide ? 'Masquer le guide des tailles' : 'Guide des tailles') + '</button>' : '') +
           (etat.guide && guide.length ? '<table class="guide"><tr><th>Taille</th><th>Équivalent</th></tr>' + guide.map((t) => '<tr><td><b>' + esc(t) + '</b></td><td>' + esc(GUIDE_TAILLES[t]) + '</td></tr>').join('') + '</table><p class="compte">Correspondance indicative. Échange possible au stand.</p>' : '') + '</div>' +
+        (function () { const r = couleurChoisie && etat.taille && dispoStock ? resteStock(p, etat.modele, couleurChoisie, etat.taille) : 99; return r > 0 && r <= 2 ? '<p class="reste-stock">Plus que ' + r + ' en stock pour ce choix</p>' : ''; })() +
         '<div class="bloc ligne-qte"><h2>Quantité</h2><div class="qte"><button type="button" data-qte="-1" aria-label="Retirer un">−</button><span>' + etat.qte + '</span><button type="button" data-qte="1" aria-label="Ajouter un">+</button></div></div>' +
         '<p class="note">Article mis de côté à votre nom jusqu’au marché choisi. <b>Paiement au stand</b> au moment du retrait. Pas d’essayage, échange possible.<br>' + esc(BOUTIQUE.regleReservation) + '</p>' +
       '</div>' +
@@ -504,7 +546,7 @@
         (etat.ajout && !etat.erreur ? '<p class="ok" role="status">✓ ' + esc(etat.ajout) + ' — choisissez une autre taille ou couleur pour en ajouter encore.</p>' : '') +
         '<div class="boutons">' +
           (totaux().nb ? '<button type="button" class="btn clair" id="aller-panier">Ma réservation (' + totaux().nb + ')</button>' : '') +
-          (p.epuiseTout ? '<button type="button" class="btn" disabled style="background:#A8A29A;cursor:not-allowed">Épuisé</button>'
+          (epuise(p) ? '<button type="button" class="btn" disabled style="background:#A8A29A;cursor:not-allowed">Épuisé</button>'
             : '<button type="button" class="btn" id="ajouter">Ajouter ' + etat.qte + sousTotal + '</button>') +
         '</div></div>';
     const v = $('vignettes');
@@ -529,15 +571,17 @@
   function ajouter() {
     const p = produits[etat.sel]; const m = p.modeles[etat.modele];
     const couleur = m.couleurs.length ? etat.couleur : etat.couleurTexte.trim();
-    if (p.epuiseTout) return;
+    if (epuise(p)) return;
     const manque = p.choix.find((c) => !etat.choix[c.label]);
     if (manque) return erreurArticle('Choisissez : ' + manque.label.toLowerCase() + '.');
     if (!couleur) return erreurArticle('Choisissez une couleur.');
     if (p.tailles.length && !etat.taille) return erreurArticle('Choisissez une taille.');
+    const reste = resteStock(p, etat.modele, couleur, etat.taille);
+    if (reste < etat.qte) return erreurArticle(reste <= 0 ? 'Plus de stock pour ce choix.' : 'Il n’en reste que ' + reste + ' pour ce choix.');
     const modele = p.modeles.length > 1 ? m.nom : p.choix.map((c) => c.label + ' ' + etat.choix[c.label].toLowerCase()).join(' · ');
     const pareil = etat.panier.find((l) => l.id === p.id && l.modele === modele && l.couleur === couleur && l.taille === etat.taille);
     if (pareil) pareil.qte += etat.qte;
-    else etat.panier.push({ cle: Date.now() + '-' + p.id, id: p.id, nom: p.nom, code: p.code, prix: p.prix, lot: !!p.offre3pour10, modele, couleur, taille: etat.taille, qte: etat.qte, photo: photoActuelle(p) });
+    else etat.panier.push({ cle: Date.now() + '-' + p.id, id: p.id, nom: p.nom, code: p.code, prix: p.prix, lot: !!p.offre3pour10, modele, couleur, taille: etat.taille, qte: etat.qte, photo: photoActuelle(p), stockCle: cleStock(p, etat.modele, couleur, etat.taille) });
     const ajoutes = etat.qte;
     sauver(); rendreCatalogue();
     // on reste sur l'article : modèle et couleur gardés, taille et quantité remises à zéro
@@ -583,6 +627,7 @@
     const lettres = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let code = 'K-';
     for (let i = 0; i < 4; i++) code += lettres[Math.floor(Math.random() * lettres.length)];
     etat.code = code; etat.erreur = '';
+    envoyerCommande();
     rendreFini(); montrer('fini');
   }
 
@@ -838,7 +883,10 @@
     if (b.dataset.choix != null) etat.choix[b.dataset.choix] = b.dataset.valeur;
     if (b.dataset.couleur != null) { etat.couleur = b.dataset.couleur; etat.defilVignettes = ($('vignettes') || {}).scrollLeft || 0; }
     if (b.dataset.taille != null) etat.taille = b.dataset.taille;
-    if (b.dataset.qte != null) etat.qte = Math.max(1, Math.min(10, etat.qte + +b.dataset.qte));
+    if (etat.taille && p.tailles.length > 1 && tailleEpuisee(p, etat.modele, etat.couleur, etat.taille)) etat.taille = '';
+    const maxQte = etat.couleur && etat.taille ? Math.max(1, Math.min(10, resteStock(p, etat.modele, etat.couleur, etat.taille))) : 10;
+    if (b.dataset.qte != null) etat.qte = etat.qte + +b.dataset.qte;
+    etat.qte = Math.max(1, Math.min(maxQte, etat.qte));
     rendreArticle();
   });
   $('ecran-article').addEventListener('input', (e) => { if (e.target.id === 'couleur-texte') { etat.couleurTexte = e.target.value; } });
@@ -851,6 +899,8 @@
     if (b.dataset.jour != null) etat.jour = +b.dataset.jour;
     if (b.dataset.creneau != null) etat.creneau = etat.creneau === b.dataset.creneau ? '' : b.dataset.creneau;
     if (b.dataset.ligne) {
+      const l0 = etat.panier.find((l) => l.cle === b.dataset.ligne);
+      if (+b.dataset.d > 0 && l0 && l0.stockCle && dispoStock && l0.stockCle in dispoStock && dispoStock[l0.stockCle] - etat.panier.filter((l) => l.stockCle === l0.stockCle).reduce((n, l) => n + l.qte, 0) <= 0) { toast('Plus de stock pour cet article.'); return; }
       etat.panier = etat.panier.map((l) => (l.cle === b.dataset.ligne ? { ...l, qte: l.qte + +b.dataset.d } : l)).filter((l) => l.qte > 0);
       sauver(); rendreCatalogue();
     }
@@ -898,6 +948,8 @@
 
   rendreCatalogue();
   majWhatsApp('catalogue');
+  chargerStock();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) chargerStock(); });
 })();
 </script>
 </body>
